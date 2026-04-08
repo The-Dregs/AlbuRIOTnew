@@ -2324,6 +2324,9 @@ MonoBehaviour:
   disableWhenQuestActive: []
   enableWhenQuestCompleted: []
   disableWhenQuestCompleted: []
+  spawnEnemyWhenQuestCompleted: {fileID: 0}
+  spawnEnemyResourcePathWhenQuestCompleted: 
+  completedQuestEnemySpawnPoint: {fileID: 0}
   areaParticleRoot: {fileID: 0}
   areaColliders: []
   enableDebugLogs: 0
@@ -4310,7 +4313,7 @@ GameObject:
   m_Component:
   - component: {fileID: 348533690}
   m_Layer: 0
-  m_Name: SPAWN2
+  m_Name: SpawnMarker_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6492,7 +6495,7 @@ GameObject:
   m_Component:
   - component: {fileID: 465410923}
   m_Layer: 0
-  m_Name: SPAWN4
+  m_Name: SpawnMarker_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9228,6 +9231,9 @@ MonoBehaviour:
   disableWhenQuestActive: []
   enableWhenQuestCompleted: []
   disableWhenQuestCompleted: []
+  spawnEnemyWhenQuestCompleted: {fileID: 0}
+  spawnEnemyResourcePathWhenQuestCompleted: 
+  completedQuestEnemySpawnPoint: {fileID: 0}
   areaParticleRoot: {fileID: 0}
   areaColliders: []
   enableDebugLogs: 0
@@ -16550,6 +16556,9 @@ MonoBehaviour:
   disableWhenQuestActive: []
   enableWhenQuestCompleted: []
   disableWhenQuestCompleted: []
+  spawnEnemyWhenQuestCompleted: {fileID: 0}
+  spawnEnemyResourcePathWhenQuestCompleted: 
+  completedQuestEnemySpawnPoint: {fileID: 0}
   areaParticleRoot: {fileID: 0}
   areaColliders: []
   enableDebugLogs: 0
@@ -20838,7 +20847,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1377088687}
   m_Layer: 0
-  m_Name: SPAWN3
+  m_Name: SpawnMarker_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27164,7 +27173,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1993354163}
   m_Layer: 0
-  m_Name: SPAWN1
+  m_Name: SpawnMarker_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

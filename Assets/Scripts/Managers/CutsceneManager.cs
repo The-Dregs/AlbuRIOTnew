@@ -105,7 +105,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
     private Coroutine exitButtonDelayCoroutine;
     private bool isExiting = false;
     private const string READY_KEY = "CutsceneReady";
-    private const string READY_SCENE_KEY = "CutsceneReadyScene";
 
     void Awake()
     {
@@ -174,12 +173,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         startSequenceStarted = true;
         IsStartSequenceComplete = false;
 
-        if (PhotonNetwork.InRoom && PhotonNetwork.LocalPlayer != null)
-        {
-            var props = new Hashtable { { READY_KEY, false }, { READY_SCENE_KEY, null } };
-            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-        }
-
         // pause day/night cycle until cutscene + spawn completes
         if (DayNightCycleManager.Instance != null)
             DayNightCycleManager.Instance.isPaused = true;
@@ -189,6 +182,13 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
 
     private void StartStartCutscene()
     {
+        if (cutsceneMode == CutsceneMode.StartScene && TransitionControlledStart)
+        {
+            if (!startCutsceneRoutineRunning)
+                StartCoroutine(FadeInThenPlayCutscene());
+            return;
+        }
+
         if (PhotonNetwork.OfflineMode && !PhotonNetwork.InRoom)
         {
             PhotonNetwork.CreateRoom("OfflineRoom");
@@ -334,8 +334,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         startCutsceneRoutineRunning = true;
 
         EnsureLoadingPanelForStartScene();
-        SetLocalPlayerCutsceneState(true);
-        LocalUIManager.Instance?.ForceClose();
 
         // Enable/disable GameObjects before cutscene starts
         EnableCutsceneObjects(true);
@@ -414,35 +412,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         
         StartCoroutine(PlayCutsceneThenSpawn());
         startCutsceneRoutineRunning = false;
-    }
-
-    private void SetLocalPlayerCutsceneState(bool inCutscene)
-    {
-        GameObject player = PlayerSpawnCoordinator.FindLocalPlayer();
-        if (player == null)
-            return;
-
-        var controller = player.GetComponent<ThirdPersonController>();
-        if (controller != null)
-        {
-            controller.SetCanMove(!inCutscene);
-            controller.SetCanControl(!inCutscene);
-        }
-
-        var combat = player.GetComponentInChildren<PlayerCombat>(true) ?? player.GetComponentInParent<PlayerCombat>();
-        if (combat != null)
-        {
-            combat.enabled = !inCutscene;
-            combat.SetCanControl(!inCutscene);
-        }
-
-        Camera cam = player.transform.Find("Camera")?.GetComponent<Camera>();
-        if (cam != null)
-            cam.enabled = !inCutscene;
-
-        var cameraOrbit = player.GetComponentInChildren<ThirdPersonCameraOrbit>();
-        if (cameraOrbit != null)
-            cameraOrbit.SetRotationLocked(inCutscene);
     }
 
     private IEnumerator ResolveStartCutsceneDirectorIfNeeded()
@@ -772,7 +741,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         // clear ready property before disconnecting
         if (PhotonNetwork.InRoom && PhotonNetwork.LocalPlayer != null)
         {
-            var props = new Hashtable { { READY_KEY, null }, { READY_SCENE_KEY, null } };
+            var props = new Hashtable { { READY_KEY, null } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
@@ -823,8 +792,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         // mark local player as ready
         if (PhotonNetwork.LocalPlayer != null)
         {
-            string currentScene = SceneManager.GetActiveScene().name;
-            var props = new Hashtable { { READY_KEY, true }, { READY_SCENE_KEY, currentScene } };
+            var props = new Hashtable { { READY_KEY, true } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
@@ -859,8 +827,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.CurrentRoom == null) return true;
 
-        string currentScene = SceneManager.GetActiveScene().name;
-
         var players = PhotonNetwork.PlayerList;
         if (players == null || players.Length == 0) return true;
 
@@ -869,12 +835,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
             if (player.CustomProperties == null || !player.CustomProperties.ContainsKey(READY_KEY))
                 return false;
             if (!(bool)player.CustomProperties[READY_KEY])
-                return false;
-            if (!player.CustomProperties.ContainsKey(READY_SCENE_KEY))
-                return false;
-
-            object readyScene = player.CustomProperties[READY_SCENE_KEY];
-            if (readyScene == null || !string.Equals(readyScene as string, currentScene, System.StringComparison.Ordinal))
                 return false;
         }
         return true;
@@ -889,7 +849,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         // skip if we already cleaned up during exit
         if (!isExiting && PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InRoom && PhotonNetwork.LocalPlayer != null)
         {
-            var props = new Hashtable { { READY_KEY, null }, { READY_SCENE_KEY, null } };
+            var props = new Hashtable { { READY_KEY, null } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
@@ -1426,14 +1386,21 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
             }
         }
 
-        // always use centralized spawn coordinator to avoid split spawn paths during start-scene flow.
-        yield return PlayerSpawnCoordinator.EnsureLocalPlayerAtSpawn(
-            maxWaitSeconds: 20f,
-            waitForSpawnMarkers: true,
-            enableDebugLogs: true,
-            logPrefix: "[CutsceneManager]");
-
-        yield return StartCoroutine(WaitForPlayerAndSetup());
+        if (spawnManager != null)
+        {
+            spawnManager.SpawnPlayerForThisClient();
+            // Wait for player to spawn
+            yield return StartCoroutine(WaitForPlayerAndSetup());
+        }
+        else
+        {
+            Debug.LogWarning("[CutsceneManager] SpawnManager is not assigned; using centralized spawn coordinator fallback.");
+            yield return PlayerSpawnCoordinator.EnsureLocalPlayerAtSpawn(
+                maxWaitSeconds: 15f,
+                waitForSpawnMarkers: true,
+                enableDebugLogs: true,
+                logPrefix: "[CutsceneManager]");
+        }
     }
 
     private void SpawnAndSetupPlayer()

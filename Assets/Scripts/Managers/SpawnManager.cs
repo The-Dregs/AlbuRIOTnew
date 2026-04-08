@@ -1,5 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
+using System.Collections;
 
 public class TutorialSpawnManager : MonoBehaviourPunCallbacks
 {
@@ -13,6 +14,7 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
     public GameObject playerPrefab3;
     [Tooltip("Optional. Player 4 prefab for 4th spawn.")]
     public GameObject playerPrefab4;
+    private Coroutine pendingNetworkSpawnRoutine;
 
     [PunRPC]
     public void RPC_SpawnPlayerForThisClient()
@@ -24,12 +26,17 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
     {
         Debug.Log($"[TutorialSpawnManager] ApplySpawnPlayerForThisClient called. Connected={PhotonNetwork.IsConnected}, InRoom={PhotonNetwork.InRoom}, OfflineMode={PhotonNetwork.OfflineMode}");
 
-        var cutsceneManager = FindFirstObjectByType<CutsceneManager>();
-        if (cutsceneManager != null &&
-            cutsceneManager.cutsceneMode == CutsceneMode.StartScene &&
-            !cutsceneManager.IsStartSequenceComplete)
+        bool onlineConnected = PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode;
+        if (onlineConnected && !PhotonNetwork.InRoom)
         {
-            Debug.Log("[TutorialSpawnManager] Spawn blocked while StartScene cutscene is active.");
+            if (pendingNetworkSpawnRoutine == null)
+            {
+                pendingNetworkSpawnRoutine = StartCoroutine(Co_WaitForRoomThenSpawn());
+            }
+            else
+            {
+                Debug.Log("[TutorialSpawnManager] Spawn request queued; already waiting for room join.");
+            }
             return;
         }
 
@@ -98,6 +105,27 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
         {
             Debug.LogError("[TutorialSpawnManager] Failed to spawn player! Player prefab is null or spawn failed.");
         }
+    }
+
+    private IEnumerator Co_WaitForRoomThenSpawn()
+    {
+        float elapsed = 0f;
+        const float timeout = 15f;
+        while (!PhotonNetwork.InRoom && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        pendingNetworkSpawnRoutine = null;
+
+        if (!PhotonNetwork.InRoom)
+        {
+            Debug.LogError("[TutorialSpawnManager] Spawn aborted: connected online but never joined room before timeout.");
+            yield break;
+        }
+
+        ApplySpawnPlayerForThisClient();
     }
 
 	// public entrypoint used by other managers; triggers RPC so each client spawns themselves

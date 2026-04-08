@@ -151,6 +151,26 @@ public class MapTransitionManager : MonoBehaviourPunCallbacks
 
         float startTime = Time.time;
 
+        bool isOnlineConnected = PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode;
+        if (isOnlineConnected && !PhotonNetwork.InRoom)
+        {
+            float roomWait = 0f;
+            const float roomWaitTimeout = 15f;
+            while (!PhotonNetwork.InRoom && roomWait < roomWaitTimeout)
+            {
+                roomWait += Time.deltaTime;
+                yield return null;
+            }
+
+            if (!PhotonNetwork.InRoom)
+            {
+                Debug.LogError("[MapTransitionManager] Connected to Photon but not in room. Aborting transition to avoid local scene desync.");
+                isTransitioning = false;
+                HideLoadingPanel();
+                yield break;
+            }
+        }
+
         bool isNetworked = PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom;
 
         if (isNetworked)
@@ -211,8 +231,9 @@ public class MapTransitionManager : MonoBehaviourPunCallbacks
         // small delay to let Awake/Start on the new scene complete
         yield return null;
 
-        // wait for all players to finish loading before continuing
-        if (waitForAllPlayers && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom)
+        // wait for all players only when no start-scene cutscene manager will handle synchronization
+        bool hasStartSceneCutscene = FindStartSceneCutsceneManager() != null;
+        if (waitForAllPlayers && !hasStartSceneCutscene && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom)
         {
             yield return StartCoroutine(Co_WaitForAllPlayersReady());
         }
@@ -285,20 +306,36 @@ public class MapTransitionManager : MonoBehaviourPunCallbacks
     {
         float elapsed = 0f;
         const float maxWait = 90f;
+        bool completed = false;
 
         while (elapsed < maxWait)
         {
             if (cutsceneManager == null)
             {
                 // cutscene manager may destroy itself after spawn flow
+                completed = true;
                 break;
             }
 
             if (cutsceneManager.IsStartSequenceComplete)
+            {
+                completed = true;
                 break;
+            }
 
             elapsed += Time.deltaTime;
             yield return null;
+        }
+
+        if (!completed)
+        {
+            Debug.LogWarning("[MapTransitionManager] Start-scene cutscene timed out. Forcing spawn fallback.");
+            yield return PlayerSpawnCoordinator.EnsureLocalPlayerAtSpawn(
+                maxWaitSeconds: 15f,
+                waitForSpawnMarkers: true,
+                enableDebugLogs: enableDebugLogs,
+                logPrefix: "[MapTransitionManager][CutsceneTimeout]");
+            CutsceneManager.SetTransitionControlledStart(false);
         }
 
         if (enableDebugLogs)

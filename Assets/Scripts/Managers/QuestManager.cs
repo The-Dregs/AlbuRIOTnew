@@ -1091,35 +1091,42 @@ public class QuestManager : MonoBehaviourPun, Photon.Pun.IPunObservable, Photon.
         if (string.IsNullOrEmpty(sceneName))
             return;
 
-        // Try to locate MapTransitionManager type in the loaded assemblies by name.
-        var type = System.Type.GetType("MapTransitionManager");
-        if (type != null)
+        // Resolve MapTransitionManager across loaded assemblies (Type.GetType("MapTransitionManager") is not reliable in all Unity contexts).
+        System.Type transitionType = null;
+        var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < assemblies.Length; i++)
         {
-            var method = type.GetMethod("BeginTransition",
+            var asm = assemblies[i];
+            if (asm == null) continue;
+
+            transitionType = asm.GetType("MapTransitionManager", throwOnError: false, ignoreCase: false);
+            if (transitionType != null)
+                break;
+        }
+
+        if (transitionType != null)
+        {
+            var beginMethod = transitionType.GetMethod("BeginTransition",
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            if (method != null)
+            if (beginMethod != null)
             {
-                method.Invoke(null, new object[] { sceneName });
+                beginMethod.Invoke(null, new object[] { sceneName });
                 return;
             }
         }
 
-        var cleanupType = System.Type.GetType("MemoryCleanupManager");
-        if (cleanupType != null)
+        Debug.LogWarning($"[QuestManager] MapTransitionManager.BeginTransition not found for '{sceneName}'. Using synchronized scene load fallback.");
+
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && !PhotonNetwork.InRoom)
         {
-            var instanceProp = cleanupType.GetProperty("Instance",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            var instance = instanceProp != null ? instanceProp.GetValue(null) : null;
-            var cleanupMethod = cleanupType.GetMethod("CleanupSceneTransitionObjects",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            if (instance != null && cleanupMethod != null)
-            {
-                cleanupMethod.Invoke(instance, null);
-            }
+            Debug.LogError($"[QuestManager] Refusing to local-load '{sceneName}' while connected but not in room. This would split clients into different lobbies.");
+            return;
         }
 
-        // Fallback: direct scene load (mostly for editor safety if manager script is missing).
-        SceneManager.LoadScene(sceneName);
+        if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
+            PhotonNetwork.LoadLevel(sceneName);
+        else
+            SceneManager.LoadScene(sceneName);
     }
     
     private void GiveQuestRewards(Quest quest)

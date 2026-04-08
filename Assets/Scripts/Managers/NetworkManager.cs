@@ -3,6 +3,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
@@ -34,6 +35,20 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public QuestManager questManager;
     public ShrineManager shrineManager;
     public MovesetManager movesetManager;
+
+    [Header("Runtime Debug Overlay")]
+    [Tooltip("Enable in-game debug overlay. Toggle visibility with F2.")]
+    public bool enableRuntimeDebugOverlay = true;
+    [Tooltip("Key used to toggle the in-game debug overlay.")]
+    public KeyCode debugOverlayToggleKey = KeyCode.F2;
+    [Tooltip("Maximum number of log lines kept in memory.")]
+    [Range(20, 500)] public int debugOverlayBufferSize = 200;
+    [Tooltip("Maximum number of lines shown on screen.")]
+    [Range(5, 80)] public int debugOverlayVisibleLines = 24;
+    [Tooltip("Overlay width in pixels.")]
+    [Range(300f, 1400f)] public float debugOverlayWidth = 780f;
+    [Tooltip("Overlay height in pixels.")]
+    [Range(120f, 700f)] public float debugOverlayHeight = 280f;
     
     // Events (renamed to avoid name collision with Photon callbacks)
     public event Action ConnectedToMasterEvent;
@@ -47,6 +62,12 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     
     // Singleton pattern
     public static NetworkManager Instance { get; private set; }
+
+    private readonly Queue<string> runtimeLogBuffer = new Queue<string>();
+    private bool isDebugOverlayVisible;
+    private GUIStyle debugOverlayTextStyle;
+    private GUIStyle debugOverlayTitleStyle;
+    private readonly StringBuilder debugOverlayLineBuilder = new StringBuilder(512);
     
     void Awake()
     {
@@ -55,6 +76,12 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            if (enableRuntimeDebugOverlay)
+            {
+                Application.logMessageReceived += OnRuntimeLogReceived;
+                AppendRuntimeLog("[NetworkManager] Runtime debug overlay ready. Press F2 to toggle.");
+            }
         }
         else
         {
@@ -73,6 +100,11 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     
     void OnDestroy()
     {
+        if (enableRuntimeDebugOverlay)
+        {
+            Application.logMessageReceived -= OnRuntimeLogReceived;
+        }
+
         if (Instance == this)
         {
             Instance = null;
@@ -129,11 +161,119 @@ public class NetworkManager : MonoBehaviourPunCallbacks
             return;
         }
 
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && !PhotonNetwork.InRoom)
+        {
+            Debug.Log("[NetworkManager] Connected to Photon but not in room yet; waiting for room join.");
+            return;
+        }
+
         if (!PhotonNetwork.IsConnected)
         {
             PhotonNetwork.GameVersion = gameVersion;
             PhotonNetwork.ConnectUsingSettings();
         }
+    }
+
+    void Update()
+    {
+        if (!enableRuntimeDebugOverlay)
+            return;
+
+        if (Input.GetKeyDown(debugOverlayToggleKey))
+        {
+            isDebugOverlayVisible = !isDebugOverlayVisible;
+            AppendRuntimeLog($"[NetworkManager] Debug overlay {(isDebugOverlayVisible ? "enabled" : "disabled")}");
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (!enableRuntimeDebugOverlay || !isDebugOverlayVisible)
+            return;
+
+        EnsureDebugOverlayStyles();
+
+        float width = Mathf.Clamp(debugOverlayWidth, 300f, Screen.width - 20f);
+        float height = Mathf.Clamp(debugOverlayHeight, 120f, Screen.height - 20f);
+        Rect panelRect = new Rect(10f, Screen.height - height - 10f, width, height);
+        GUI.Box(panelRect, GUIContent.none);
+
+        Rect titleRect = new Rect(panelRect.x + 8f, panelRect.y + 6f, panelRect.width - 16f, 20f);
+        GUI.Label(titleRect, "Debug Log (F2)", debugOverlayTitleStyle);
+
+        string[] lines = runtimeLogBuffer.ToArray();
+        int start = Mathf.Max(0, lines.Length - Mathf.Max(1, debugOverlayVisibleLines));
+
+        float lineHeight = 18f;
+        Rect lineRect = new Rect(panelRect.x + 8f, panelRect.y + 28f, panelRect.width - 16f, lineHeight);
+        for (int i = start; i < lines.Length; i++)
+        {
+            if (lineRect.yMax > panelRect.yMax - 4f)
+                break;
+
+            GUI.Label(lineRect, lines[i], debugOverlayTextStyle);
+            lineRect.y += lineHeight;
+        }
+    }
+
+    private void EnsureDebugOverlayStyles()
+    {
+        if (debugOverlayTextStyle == null)
+        {
+            debugOverlayTextStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 13,
+                normal = { textColor = Color.white },
+                richText = false,
+                wordWrap = false
+            };
+        }
+
+        if (debugOverlayTitleStyle == null)
+        {
+            debugOverlayTitleStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 14,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = Color.white }
+            };
+        }
+    }
+
+    private void OnRuntimeLogReceived(string condition, string stackTrace, LogType type)
+    {
+        if (!enableRuntimeDebugOverlay)
+            return;
+
+        string levelTag = type == LogType.Error || type == LogType.Assert || type == LogType.Exception
+            ? "ERR"
+            : (type == LogType.Warning ? "WRN" : "LOG");
+
+        string sanitized = string.IsNullOrEmpty(condition)
+            ? string.Empty
+            : condition.Replace('\n', ' ').Replace('\r', ' ');
+
+        debugOverlayLineBuilder.Clear();
+        debugOverlayLineBuilder
+            .Append('[')
+            .Append(DateTime.Now.ToString("HH:mm:ss"))
+            .Append("] ")
+            .Append(levelTag)
+            .Append(": ")
+            .Append(sanitized);
+
+        AppendRuntimeLog(debugOverlayLineBuilder.ToString());
+    }
+
+    private void AppendRuntimeLog(string line)
+    {
+        if (string.IsNullOrEmpty(line))
+            return;
+
+        runtimeLogBuffer.Enqueue(line);
+        int max = Mathf.Max(20, debugOverlayBufferSize);
+        while (runtimeLogBuffer.Count > max)
+            runtimeLogBuffer.Dequeue();
     }
 
     // optional: allow singleplayer/offline sessions without a network connection
@@ -163,13 +303,9 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         JoinedRoomEvent?.Invoke();
         
         // optional immediate spawn; disabled by default to avoid overriding cutscene/tutorial spawn flows
-        if (autoSpawnOnJoinedRoom && !CutsceneManager.TransitionControlledStart)
+        if (autoSpawnOnJoinedRoom)
         {
             SpawnPlayer();
-        }
-        else if (autoSpawnOnJoinedRoom && CutsceneManager.TransitionControlledStart)
-        {
-            Debug.Log("[NetworkManager] Auto-spawn blocked because transition-controlled start cutscene is active.");
         }
         
         // Sync game state
