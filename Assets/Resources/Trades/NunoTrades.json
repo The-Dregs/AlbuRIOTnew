@@ -1,0 +1,112 @@
+{
+  "trades": [
+    {
+      "tradeName": "Healing Aloe Exchange",
+      "description": "Trade aloe for a bolo knife.",
+      "requiredItemNames": ["Aloe Vera"],
+      "requiredQuantities": [3],
+      "rewardItemName": "Bolo Knife",
+      "rewardQuantity": 1,
+      "maxUses": -1,
+      "requiresUnlock": true,
+      "requiredShrineIds": [],
+      "requiredQuestIds": ["Return to the Nuno"]
+    },
+    {
+      "tradeName": "Lily Offering",
+      "description": "Trade lilies for healing supplies.",
+      "requiredItemNames": ["Lunar Lily"],
+      "requiredQuantities": [5],
+      "rewardItemName": "Aloe Vera",
+      "rewardQuantity": 3,
+      "maxUses": -1,
+      "requiresUnlock": true,
+      "requiredShrineIds": [],
+      "requiredQuestIds": ["Return to the Nuno"]
+    },
+    {
+      "tradeName": "Herbal Bundle",
+      "description": "Combine herbs for a powerful item.",
+      "requiredItemNames": ["Aloe Vera", "Lunar Lily"],
+      "requiredQuantities": [2, 2],
+      "rewardItemName": "Geranium",
+      "rewardQuantity": 5,
+      "maxUses": -1,
+      "requiresUnlock": false,
+      "requiredShrineIds": [],
+      "requiredQuestIds": []
+    },
+    {
+      "tradeName": "Banana for Aloe",
+      "description": "A simple exchange.",
+      "requiredItemNames": ["Banana"],
+      "requiredQuantities": [1],
+      "rewardItemName": "Aloe Vera",
+      "rewardQuantity": 1,
+      "maxUses": -1,
+      "requiresUnlock": false,
+      "requiredShrineIds": [],
+      "requiredQuestIds": []
+    },
+    {
+      "tradeName": "Fiber Weaving",
+      "description": "Trade fiber for cloth.",
+      "requiredItemNames": ["Fiber Leaves"],
+      "requiredQuantities": [3],
+      "rewardItemName": "Cloth",
+      "rewardQuantity": 1,
+      "maxUses": -1,
+      "requiresUnlock": false,
+      "requiredShrineIds": [],
+      "requiredQuestIds": []
+    },
+    {
+      "tradeName": "Twine Making",
+      "description": "Turn gathered fiber into strong string.",
+      "requiredItemNames": ["Fiber Leaves"],
+      "requiredQuantities": [2],
+      "rewardItemName": "String",
+      "rewardQuantity": 1,
+      "maxUses": -1,
+      "requiresUnlock": false,
+      "requiredShrineIds": [],
+      "requiredQuestIds": []
+    },
+    {
+      "tradeName": "Fruit for Bandage",
+      "description": "Trade fresh fruit for simple medical supplies.",
+      "requiredItemNames": ["Pineapple", "Sugarcane"],
+      "requiredQuantities": [1, 1],
+      "rewardItemName": "Bandage",
+      "rewardQuantity": 1,
+      "maxUses": -1,
+      "requiresUnlock": false,
+      "requiredShrineIds": [],
+      "requiredQuestIds": []
+    },
+    {
+      "tradeName": "Crystal for Lantern",
+      "description": "A shard of crystal for a guiding light.",
+      "requiredItemNames": ["Crystal"],
+      "requiredQuantities": [1],
+      "rewardItemName": "Lantern",
+      "rewardQuantity": 1,
+      "maxUses": 1,
+      "requiresUnlock": false,
+      "requiredShrineIds": [],
+      "requiredQuestIds": []
+    },
+    {
+      "tradeName": "Charm of Protection",
+      "description": "Offer herbs and cloth in exchange for a protective charm.",
+      "requiredItemNames": ["Aloe Vera", "Cloth"],
+      "requiredQuantities": [2, 1],
+      "rewardItemName": "Talisman",
+      "rewardQuantity": 1,
+      "maxUses": 1,
+      "requiresUnlock": false,
+      "requiredShrineIds": [],
+      "requiredQuestIds": []
+    }
+  ]
+}

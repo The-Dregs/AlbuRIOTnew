@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3162daab5e02f8408c545062602df15, type: 3}
+  m_Name: Busaw
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  enemyType: 16
+  enemyName: Busaw
+  maxHealth: 100
+  basicDamage: 10
+  moveSpeed: 1.5
+  chaseSpeed: 3.5
+  patrolSpeed: 2
+  rotationSpeedDegrees: 360
+  backoffSpeedMultiplier: 0.6
+  orbitWhenOnCooldown: 1
+  orbitSpeedMultiplier: 0.7
+  desiredAttackDistanceFraction: 0.85
+  attackRange: 2
+  attackWindup: 0.3
+  attackCooldown: 1.5
+  attackMoveLock: 0.35
+  detectionRange: 12
+  chaseLoseRange: 15
+  enablePatrol: 1
+  patrolRadius: 8
+  patrolWait: 1.5
+  specialFacingAngle: 20
+  preferredDistance: 3
+  aggressionLevel: 0.5
+  intelligenceLevel: 0.5
+  deathVFXPrefab: {fileID: 0}
+  deathSFX: {fileID: 0}
+  hitVFXPrefab: {fileID: 0}
+  hitSFX: {fileID: 0}
+  syncOverNetwork: 1
+  networkUpdateRate: 10
+  showDebugGizmos: 0
+  debugColor: {r: 1, g: 0, b: 0, a: 1}
+

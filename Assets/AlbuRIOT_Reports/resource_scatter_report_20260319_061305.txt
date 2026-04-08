@@ -1,0 +1,302 @@
+AlbuRIOT Resource Scatter Report (MapResourcesGenerator)
+Generated: 3/19/2026 6:13:05 AM
+
+Rows: 130
+Seed 12345 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1352 (13.52/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12345 | Items/3Items/Item_Geranium | placed 100/100 attempts 1385 (13.85/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12345 | UnderstoryPlants | placed 300/300 attempts 1598 (5.33/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12345 | Ferns | placed 260/260 attempts 1026 (3.95/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12345 | Trees | placed 320/320 attempts 1257 (3.93/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12345 | Rocks_Small | placed 140/140 attempts 480 (3.43/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12345 | Rocks_Big | placed 2/2 attempts 5 (2.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12345 | Camps | placed 4/4 attempts 4 (1.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: perlin.
+Seed 12345 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12345 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12345 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12345 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12345 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=3 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12346 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1598 (15.98/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12346 | Items/3Items/Item_Geranium | placed 100/100 attempts 1766 (17.66/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12346 | UnderstoryPlants | placed 300/300 attempts 1774 (5.91/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12346 | Ferns | placed 260/260 attempts 964 (3.71/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12346 | Trees | placed 320/320 attempts 1559 (4.87/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12346 | Rocks_Small | placed 140/140 attempts 460 (3.29/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12346 | Rocks_Big | placed 2/2 attempts 14 (7.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12346 | Camps | placed 4/4 attempts 7 (1.75/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: spacing.
+Seed 12346 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12346 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12346 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12346 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12346 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=3 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12347 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1354 (13.54/place) | pAccept 0.12 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12347 | Items/3Items/Item_Geranium | placed 100/100 attempts 1803 (18.03/place) | pAccept 0.12 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12347 | UnderstoryPlants | placed 300/300 attempts 1713 (5.71/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12347 | Ferns | placed 260/260 attempts 1186 (4.56/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12347 | Trees | placed 320/320 attempts 1605 (5.02/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12347 | Rocks_Small | placed 140/140 attempts 475 (3.39/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12347 | Rocks_Big | placed 2/2 attempts 7 (3.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12347 | Camps | placed 4/4 attempts 7 (1.75/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: spacing.
+Seed 12347 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12347 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12347 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12347 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12347 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=3 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12348 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1513 (15.13/place) | pAccept 0.11 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12348 | Items/3Items/Item_Geranium | placed 100/100 attempts 1510 (15.10/place) | pAccept 0.11 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12348 | UnderstoryPlants | placed 300/300 attempts 1795 (5.98/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12348 | Ferns | placed 260/260 attempts 1018 (3.92/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12348 | Trees | placed 320/320 attempts 1519 (4.75/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12348 | Rocks_Small | placed 140/140 attempts 547 (3.91/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12348 | Rocks_Big | placed 2/2 attempts 17 (8.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12348 | Camps | placed 4/4 attempts 4 (1.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: perlin.
+Seed 12348 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12348 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12348 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12348 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12348 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=3 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12349 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1670 (16.70/place) | pAccept 0.09 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12349 | Items/3Items/Item_Geranium | placed 100/100 attempts 1782 (17.82/place) | pAccept 0.09 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12349 | UnderstoryPlants | placed 300/300 attempts 2283 (7.61/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12349 | Ferns | placed 260/260 attempts 1355 (5.21/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12349 | Trees | placed 320/320 attempts 1871 (5.85/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12349 | Rocks_Small | placed 140/140 attempts 530 (3.79/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12349 | Rocks_Big | placed 2/2 attempts 9 (4.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12349 | Camps | placed 4/4 attempts 7 (1.75/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: spacing.
+Seed 12349 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12349 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12349 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12349 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12349 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=3 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12350 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1607 (16.07/place) | pAccept 0.09 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12350 | Items/3Items/Item_Geranium | placed 100/100 attempts 1832 (18.32/place) | pAccept 0.09 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12350 | UnderstoryPlants | placed 300/300 attempts 1648 (5.49/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12350 | Ferns | placed 260/260 attempts 911 (3.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12350 | Trees | placed 320/320 attempts 1395 (4.36/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12350 | Rocks_Small | placed 140/140 attempts 522 (3.73/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12350 | Rocks_Big | placed 2/2 attempts 7 (3.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12350 | Camps | placed 4/4 attempts 16 (4.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: spacing.
+Seed 12350 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12350 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12350 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12350 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12350 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=1 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12351 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1596 (15.96/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12351 | Items/3Items/Item_Geranium | placed 100/100 attempts 1866 (18.66/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12351 | UnderstoryPlants | placed 300/300 attempts 2136 (7.12/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12351 | Ferns | placed 260/260 attempts 1238 (4.76/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12351 | Trees | placed 320/320 attempts 1566 (4.89/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12351 | Rocks_Small | placed 140/140 attempts 545 (3.89/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12351 | Rocks_Big | placed 2/2 attempts 7 (3.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12351 | Camps | placed 4/4 attempts 5 (1.25/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: spacing.
+Seed 12351 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12351 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12351 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12351 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12351 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=3 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12352 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1701 (17.01/place) | pAccept 0.09 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12352 | Items/3Items/Item_Geranium | placed 100/100 attempts 1644 (16.44/place) | pAccept 0.09 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12352 | UnderstoryPlants | placed 300/300 attempts 1752 (5.84/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12352 | Ferns | placed 260/260 attempts 1136 (4.37/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12352 | Trees | placed 320/320 attempts 1495 (4.67/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12352 | Rocks_Small | placed 140/140 attempts 548 (3.91/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12352 | Rocks_Big | placed 2/2 attempts 10 (5.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12352 | Camps | placed 4/4 attempts 6 (1.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: spacing.
+Seed 12352 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12352 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12352 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12352 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12352 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=2 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12353 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1641 (16.41/place) | pAccept 0.14 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12353 | Items/3Items/Item_Geranium | placed 100/100 attempts 1869 (18.69/place) | pAccept 0.14 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12353 | UnderstoryPlants | placed 300/300 attempts 1875 (6.25/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12353 | Ferns | placed 260/260 attempts 1120 (4.31/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12353 | Trees | placed 320/320 attempts 1470 (4.59/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12353 | Rocks_Small | placed 140/140 attempts 594 (4.24/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12353 | Rocks_Big | placed 2/2 attempts 4 (2.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12353 | Camps | placed 4/4 attempts 15 (3.75/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: spacing.
+Seed 12353 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12353 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12353 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12353 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12353 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=3 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+Seed 12354 | Items/3Items/Item_AloeVera | placed 100/100 attempts 1967 (19.67/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12354 | Items/3Items/Item_Geranium | placed 100/100 attempts 1852 (18.52/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12354 | UnderstoryPlants | placed 300/300 attempts 1917 (6.39/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12354 | Ferns | placed 260/260 attempts 1182 (4.55/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12354 | Trees | placed 320/320 attempts 1628 (5.09/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12354 | Rocks_Small | placed 140/140 attempts 508 (3.63/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12354 | Rocks_Big | placed 2/2 attempts 7 (3.50/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12354 | Camps | placed 4/4 attempts 4 (1.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: perlin.
+Seed 12354 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12354 | RemnantGuards | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Guards 3/3 | guardSpawnFailed 0
+Seed 12354 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12354 | SpawnEntrance | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1/1 entranceCandidateTries=1 reusedExisting=False | usingEntranceChildMarkers=True
+Seed 12354 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=2 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=False candidateTries=1
+
+---
+Formulas used (from `Assets/Scripts/Editor/AlbuRIOTTestingWindow.cs`):
+- Formulas 11.0-11.4: probability decomposition for Perlin/height/slope to acceptance (`pPerlin`, `pHeight`, `pSlope`, `pAccept`) and expected placed (`expectedPlaced`)
+- Formulas 12.0-12.2: attempt/efficiency metrics (`attemptsPerPlacement`, `estAttemptsPerPlacement`, `efficiency`)
+- Formulas 13.0-13.3: rejection and constraint breakdown (`heightRejectionRate`, `slopeRejectionRate`, `spacingRejectionRate`, `constraintEffectiveness`)
+
+Research-style interpretation (model training perspective)
+
+This report describes procedural decor + quest/spawn placement behavior under fixed inspector parameters, measured across 10 seeds (12345-12354). The key quantitative signals are: (a) whether the generator consistently reaches desired counts, and (b) how expensive those placements are in terms of total attempts (proxy for constraint tightness).
+
+1) Herb coverage stability (Perlin-thresholded scatter)
+- AloeVera: placed 100/100 every seed; attempts/place averages 16.00; pAccept averages ~0.116; dominant rejection: perlin.
+- Geranium: placed 100/100 every seed; attempts/place averages 17.31; pAccept averages ~0.116; dominant rejection: perlin.
+- Interpretation: Perlin acceptance is relatively low/moderate, so the system needs many retries, but constraints are not preventing successful placement. This is good for controlled diversity: the “valid region” is smaller, but the generator is able to fully populate it.
+
+2) Understory + decor placement (height/slope/biome + spacing constrained)
+All categories below reach desired counts every seed, but the attempts/place metrics indicate they are more constraint-heavy than herbs (pAccept is NA here because these scatters are not Perlin-thresholded in the same way).
+- UnderstoryPlants (desired 300): attempts/place avg 6.16; dominant rejection: height.
+- Ferns (desired 260): attempts/place avg 4.28; dominant rejection: height.
+- Trees (desired 320): attempts/place avg 4.80; dominant rejection: height.
+- Rocks_Small (desired 140): attempts/place avg 3.72; dominant rejection: height.
+- Rocks_Big (desired 2): attempts/place avg 4.35; dominant rejection: height. (Small sample size, so per-seed variability is expected.)
+- Camps (desired 4): attempts/place avg 1.88; dominant rejection varies in the report text (perlin/spacing), but the system still reliably hits the target count.
+- Note on `expected`/`eff`: the exporter computes `expectedPlaced` only for Perlin-thresholded scatters, so for non-Perlin categories it reports `expected 0` and `eff 0.00`. The operationally meaningful metric here is attempts/place (retry cost) and placed/desired (success rate).
+
+3) Fixed placement and spawn/quest reliability
+- Remnants: always 3/3 with attempts/place 1.00; guard spawn: 3/3 with guardSpawnFailed = 0.
+- BrokenShipQuest: always 1/1 with clearanceRejected=0 and spawnFailed=0.
+- SpawnEntrance: always 1/1 with entranceCandidateTries=1 and usingEntranceChildMarkers=True.
+- SpawnSlots: always placed 4/4 and entrance/final counts look consistent, but the report shows attempts=0. This is a limitation of the current exported metric (spawn-slot “attempt” bookkeeping is not surfaced into the scatter exporter). Use `Candidates=... Final=...`, `entrance X/Y`, and `candidateTries` as the reliability indicators here.
+
+Overall: The generator is reliably meeting all desired placement counts across seeds. The dominant “cost” is constraint filtering rather than failure: herbs are mostly limited by Perlin acceptance, while non-herb decor is mostly limited by height-based and neighborhood/spacing constraints (dominant rejection reported as height). This profile is well-suited for downstream uses where you want stable counts but procedural diversity in where retries concentrate.
+
+Recommended next steps for a paper-grade evaluation
+- Expand the seed batch (≥50 seeds) and report confidence intervals for attempts/place per category (especially `UnderstoryPlants`, `Trees`, and `Rocks_Big`).
+- Add a placement validity check to complement attempts metrics (e.g., unreachable-area sampling, navmesh reachability, “in-water” rejection audit).
+- If comparing generator versions, treat changes in (placed/desired, attempts/place, dominant rejection reason) as the primary behavioral deltas; treat `pAccept`/`expectedPlaced`/`eff` as meaningful only for Perlin-thresholded scatters in the current exporter.

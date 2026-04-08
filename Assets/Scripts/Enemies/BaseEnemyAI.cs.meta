@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: b059564cc1bd6004aabf52c8b7ede47e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - enemyData: {instanceID: 0}
+  - animator: {instanceID: 0}
+  - buffDamageVFXPrefab: {fileID: 5433017580198672396, guid: 4288ad245d395a14ebe99e9957862789, type: 3}
+  - buffSpeedVFXPrefab: {fileID: 8652154132609600191, guid: 52d9d0080de054c49b80bf245b40c075, type: 3}
+  - buffStaminaVFXPrefab: {fileID: 5758305392496111728, guid: f6967ffcc2ca21b4c9467a79c9d48514, type: 3}
+  - buffHealthVFXPrefab: {fileID: 3024800097872928849, guid: fe2620124f94f124ab9a00b7a63f212a, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

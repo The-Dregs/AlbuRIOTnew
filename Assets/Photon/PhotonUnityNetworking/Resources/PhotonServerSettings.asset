@@ -1,0 +1,166 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3758f8f58fdef43803eb9be1df0608, type: 3}
+  m_Name: PhotonServerSettings
+  m_EditorClassIdentifier: 
+  AppSettings:
+    AppIdRealtime: b91e0e62-4e2a-480e-afd5-e7536c2b8516
+    AppIdFusion: 
+    AppIdChat: 635e5f7f-f273-4339-a0d1-56d07123238b
+    AppIdVoice: 
+    AppVersion: 
+    UseNameServer: 1
+    FixedRegion: asia
+    Server: 
+    Port: 0
+    ProxyServer: 
+    Protocol: 0
+    EnableProtocolFallback: 1
+    AuthMode: 0
+    EnableLobbyStatistics: 0
+    NetworkLogging: 1
+  DevRegion: hk
+  PunLogging: 0
+  EnableSupportLogger: 0
+  RunInBackground: 1
+  StartInOfflineMode: 0
+  RpcList:
+  - ClickRpc
+  - DestroyRpc
+  - DestroySpaceship
+  - Fire
+  - RespawnSpaceship
+  - StartDialogueForAll
+  - RPC_ContinueDialogue
+  - RPC_SkipDialogue
+  - RPC_RefreshPlayerList
+  - RPC_DebugReadyState
+  - RPC_PlayDeath
+  - RPC_PlayHit
+  - RPC_TakeDamage
+  - RPC_ApplyDamage
+  - RPC_AssignAbilitySlot1ByPath
+  - RPC_PlayAnimTrigger
+  - RPC_ApplyDebuff
+  - RPC_AddKillProgress
+  - RPC_AddReachProgress
+  - RPC_ClearModel
+  - RPC_EquipModel
+  - RPC_RequestDestroy
+  - RPC_ActivateShrine
+  - RPC_AddItem
+  - RPC_AddScore
+  - RPC_ChatMessage
+  - RPC_CompleteQuest
+  - RPC_ExecuteSpecialMove
+  - RPC_LosePower
+  - RPC_MakeOffering
+  - RPC_PauseGame
+  - RPC_PickupItem
+  - RPC_PlayDebuffVFX
+  - RPC_PlayMovesetVFX
+  - RPC_PlayPowerStealVFX
+  - RPC_RemoveItem
+  - RPC_RemovePower
+  - RPC_ResumeGame
+  - RPC_SetGameState
+  - RPC_SetMoveset
+  - RPC_StartGame
+  - RPC_StartQuest
+  - RPC_StealPower
+  - RPC_SwapSlots
+  - RPC_SyncGameState
+  - RPC_SyncItemPickup
+  - RPC_SyncMovesetState
+  - RPC_SyncQuestProgress
+  - RPC_SyncQuestState
+  - RPC_UpdateObjectiveProgress
+  - RPC_OnDeathFX
+  - RPC_PlayTrigger
+  - RPC_EnemyTakeDamage
+  - PlayPowerStealVFX
+  - RPC_PlayUniformPowerStealVFX
+  - RPC_PlayCutscene
+  - RPC_SkipCutscene
+  - RPC_FadeInThenPlayCutscene
+  - RPC_ShowTutorialPanel
+  - RPC_SpawnPlayerForThisClient
+  - RPC_ClearAll
+  - RPC_SpawnAll
+  - RPC_GenerateAll
+  - RPC_ApplyHit
+  - RPC_SyncHitState
+  - RPC_HitPopEffect
+  - RPC_StartSinkAnimation
+  - RPC_SetBool
+  - RPC_SetTrigger
+  - RPC_OnRevived
+  - RPC_Revive
+  - RPC_SetDowned
+  - RPC_PlayCrawlDeath
+  - RPC_MasterDestroy
+  - RPC_RemoveBuffVFX
+  - RPC_SpawnVFX
+  - RPC_SpawnVFXAtPosition
+  - RPC_GrantItem
+  - RPC_UpdateVFXScale
+  - RPC_RequestProgressUpdate
+  - RPC_RequestQuestStateSync
+  - RPC_SyncFullQuestState
+  - RPC_UpdateMultiItemProgress
+  - RPC_RequestPickup
+  - RPC_SyncPickupState
+  - RPC_PlayQuestCutscene
+  - RPC_SkipQuestCutscene
+  - RPC_PlayEndingCutscene
+  - RPC_SyncSpawnPositions
+  - RPC_SpawnGodModeBuffVFX
+  - RPC_PhaseChanged
+  - RPC_BakunawaSetTrigger
+  - RPC_BakunawaSetHeadExhausted
+  - RPC_TriggerCutscene
+  - RPC_SkipAreaCutscene
+  - RPC_AllQuestsCompleted_LoadNextMap
+  - RPC_SyncQuestStatePayload
+  - RPC_CompleteCollectObjectiveForAll
+  - RPC_RequestCollectObjectiveCompletion
+  - RPC_SyncTerrainSeed
+  - RPC_SyncDecorSeed
+  - RPC_ForceClockSync
+  - RPC_GrantBuffToOwnedPlayers
+  - RPC_SetCampVisualCleared
+  - RPC_SetSpawnedEnemyParent
+  - RPC_SetGeneratedParent
+  - RPC_PlayKapreAbilitySfx
+  - RPC_ApplyCutsceneCameraUprightOverride
+  - RPC_PlayAttackSound
+  - RPC_PlayComboComplete
+  - RPC_PlayFootstep
+  - RPC_PlayHitSound
+  - RPC_PlayJumpSound
+  - RPC_PlayLandSound
+  - RPC_PlayRollSound
+  - RPC_SyncCollectCompletionCount
+  - RpcSpawnComboHitVFX
+  - RpcSpawnHitImpactVFX
+  - RPC_RequestMapTransition
+  - RPC_PlayHitObjectSound
+  - RPC_RequestNetworkDestroy
+  - RPC_RequestDecorSeed
+  - RPC_RequestCameraStateFromHost
+  - RPC_RequestFogFromHost
+  - RPC_SetFogPixels
+  - RPC_SetMinimapCameraState
+  - RPC_RequestCompletedQuestEnemySpawn
+  DisableAutoOpenWizard: 1
+  ShowSettings: 1
+  DevRegionSetOnce: 1

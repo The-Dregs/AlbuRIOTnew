@@ -1,0 +1,21 @@
+# Normalize line endings
+* text=auto
+
+# Improve diffs for common code
+*.cs diff=csharp
+*.shader linguist-language=HLSL
+*.hlsl linguist-language=HLSL
+
+# Treat images and binaries as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.psd binary
+*.fbx binary
+*.anim binary
+*.controller binary
+*.unity binary
+*.prefab binary
+*.asset binary
+*.mat binary

@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49583e7f51600d243807eff9b726b809, type: 3}
+  m_Name: Bandage
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: Bandage
+  description: Sterile bandages for treating wounds, providing quick first aid and
+    restoring a small amount of health.
+  icon: {fileID: 21300000, guid: a8ff486cfbfbd154a8e8845d92920e02, type: 3}
+  itemType: 0
+  maxStack: 10
+  healthModifier: 0
+  staminaModifier: 0
+  damageModifier: 0
+  speedModifier: 0
+  staminaCostModifier: 0
+  healAmount: 25
+  staminaRestore: 0
+  effectDuration: 0
+  isQuestItem: 0
+  questId: 
+  canBeOffered: 0
+  offeringValue: 1
+  grantsPower: 0
+  associatedEnemy: 
+  uniqueInstance: 0
+  pickupSound: {fileID: 0}
+  useSound: {fileID: 0}
+  pickupEffect: {fileID: 0}
+  useEffect: {fileID: 0}
+  modelPrefab: {fileID: 0}
+  overrideTransform: 0
+  modelLocalPosition: {x: 0, y: 0, z: 0}
+  modelLocalEulerAngles: {x: 0, y: 0, z: 0}
+  modelScale: {x: 1, y: 1, z: 1}

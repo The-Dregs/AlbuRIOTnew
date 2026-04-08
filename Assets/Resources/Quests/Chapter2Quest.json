@@ -1,0 +1,115 @@
+{
+  "quests": [
+    {
+      "questName": "Ask the Nuno",
+      "description": "Ask the Nuno sa Punso how to make amends.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "objectiveType": "TalkTo",
+      "targetId": "NunoSaPunso",
+      "requiredCount": 1,
+      "talkDialogueLines": [
+        "Hmph! You dare tread upon my mound, mortal?",
+        "This land remembers what your kind has done. The roots cry out, the soil weeps.",
+        "But... I sense something different in you. The mark of the Albularyo.",
+        "Perhaps you are not beyond redemption. Perhaps the spirits chose you for a reason.",
+        "If you wish to make amends, you must prove your respect for the earth.",
+        "Bring me healing herbs from the wild — Aloe, Geranium, Sugar Cane, and Fiber Leaves.",
+        "Only then can we perform the cleansing ritual and restore what was broken.",
+        "Now go, Albularyo. The night in this island is not friendly."
+      ]
+    },
+    {
+      "questName": "Collect Healing Herbs",
+      "description": "Gather herbs in the wild for the Nuno's ritual.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "objectives": [
+        {
+          "objectiveName": "Collect Herbs",
+          "description": "Gather 3 Aloes, 3 Geranium, 3 Sugar Cane, and 5 Fiber Leaves.",
+          "objectiveType": "Collect",
+          "targetId": "Aloe",
+          "requiredCount": 14,
+          "collectItemIds": ["Aloe", "Geranium", "Sugarcane", "Fiber Leaves"],
+          "collectQuantities": [3, 3, 3, 5]
+        }
+      ]
+    },
+    {
+      "questName": "Return to the Nuno",
+      "description": "Bring the herbs to the Nuno sa Punso to complete the ritual.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "objectiveType": "TalkTo",
+      "targetId": "NunoSaPunso",
+      "requiredCount": 1,
+      "talkDialogueLines": [
+        "You have returned... and with the herbs I asked for. Good.",
+        "Aloe for healing, Geranium for protection, Sugar Cane for sweetness of spirit, and Fiber Leaves to bind it all together.",
+        "The old ways still hold power, Albularyo. Remember that.",
+        "With these, the ritual is complete. The mound is cleansed, and the spirits are at peace... for now.",
+        "You have earned my trust. From this day, you may trade with me for supplies.",
+        "But your journey is far from over. There is a broken ship along the coast.",
+        "Find it. Gather what remains of its hull. That vessel is your path forward.",
+        "Be warned — the creatures that roam this island will not let you pass easily.",
+        "Go now. The sea waits for no one."
+      ]
+    },
+    {
+      "questName": "Find the Broken Ship",
+      "description": "Search for the shipwreck in the coastal area.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "objectiveType": "FindArea",
+      "targetId": "BrokenShip1",
+      "requiredCount": 1
+    },
+    {
+      "questName": "Collect Ship Remnants",
+      "description": "Gather ship remnants from the wreckage.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "objectives": [
+        {
+          "objectiveName": "Gather Remnants",
+          "description": "Collect 3 ship remnants from the wreckage.",
+          "objectiveType": "Collect",
+          "targetId": "ShipRemnant",
+          "requiredCount": 3,
+          "collectItemIds": ["ShipRemnant"],
+          "collectQuantities": [3]
+        }
+      ]
+    },
+    {
+      "questName": "Approach the Ship to Repair",
+      "description": "Go to the broken ship to begin repairs.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "cutsceneOnCompleteName": "Cutscene_BrokenShip",
+      "objectiveType": "ReachArea",
+      "targetId": "BrokenShip2",
+      "requiredCount": 1
+    },
+    {
+      "questName": "Defeat the Kapre",
+      "description": "The Kapre has appeared. Defeat it to continue.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "objectiveType": "Kill",
+      "targetId": "Kapre",
+      "requiredCount": 1
+    },
+    {
+      "questName": "Fix the Broken Ship",
+      "description": "Return to the ship and complete the repairs.",
+      "requiresAllObjectives": true,
+      "autoAdvanceObjectives": true,
+      "cutsceneOnCompleteName": "ShipRepairedCutscene",
+      "objectiveType": "ReachArea",
+      "targetId": "ShipRepairArea",
+      "requiredCount": 1
+    }
+  ]
+}

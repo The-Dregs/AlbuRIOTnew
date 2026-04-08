@@ -1,0 +1,42 @@
+AlbuRIOT Resource Scatter Report (MapResourcesGenerator)
+Generated: 3/19/2026 5:47:07 AM
+Rows: 21
+
+Seed 12345 | Items/3Items/Item_AloeVera | placed 100/100 attempts 2239 (22.39/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12345 | Items/3Items/Item_AloeVera | placed 100/100 attempts 2403 (24.03/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12345 | Items/3Items/Item_Geranium | placed 100/100 attempts 2236 (22.36/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12345 | Items/3Items/Item_Geranium | placed 100/100 attempts 2448 (24.48/place) | pAccept 0.13 | expected 100.0 eff 1.00
+  Meets desired count. Acceptance probability is low; expect many retries. Efficiency near expected capacity. Dominant rejection: perlin.
+Seed 12345 | UnderstoryPlants | placed 289/300 attempts 12000 (41.52/place) | pAccept=NA | expected 0.0 eff 0.00
+  Below desired by 11. Acceptance probability is low; expect many retries. Efficiency low vs expected capacity (likely spacing/water/height constraints). Dominant rejection: height.
+Seed 12345 | Remnants | placed 3/3 attempts 3 (1.00/place) | pAccept=NA | expected 3.0 eff 1.00
+  Remnants 3/3 | guards 3/3 | clearanceRejected 0 spawnFailed 0 guardFailed 0
+Seed 12345 | BrokenShipQuest | placed 1/1 attempts 1 (1.00/place) | pAccept=NA | expected 1.0 eff 1.00
+  Placed=1 clearanceRejected=0 spawnFailed=0 minDistFromSpawns=80.0m
+Seed 12345 | SpawnSlots | placed 4/4 attempts 0 (0.00/place) | pAccept=NA | expected 4.0 eff 1.00
+  Candidates=1 Final=4 usingEntranceChildMarkers=True | entrance 1/1 reusedExisting=True candidateTries=1
+Seed 12345 | Scene/Herbs | placed 379/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Plants/Herbs child count
+Seed 12345 | Scene/UnderstoryPlants | placed 573/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Plants/Understory child count
+Seed 12345 | Scene/Trees | placed 632/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Trees child count
+Seed 12345 | Scene/Ferns | placed 482/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Ferns child count
+Seed 12345 | Scene/Rocks_Small | placed 230/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Rocks/_Small child count
+Seed 12345 | Scene/Rocks_Big | placed 4/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Rocks/_Big child count
+Seed 12345 | Scene/Remnants | placed 3/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Remnants child count
+Seed 12345 | Scene/RemnantGuards | placed 3/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  RemnantGuards child count
+Seed 12345 | Scene/Camps | placed 8/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Camps child count
+Seed 12345 | Scene/BrokenShipQuest | placed 1/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  Quest/BrokenShipQuest existence
+Seed 12345 | Scene/SpawnEntrance | placed 1/0 attempts 0 (0.00/place) | pAccept=NA | expected 0.0 eff 0.00
+  SpawnArea/SpawnEntrance existence

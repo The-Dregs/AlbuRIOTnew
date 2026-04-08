@@ -1,0 +1,29 @@
+{
+  "questName": "Bakunawa Final Defense",
+  "description": "Push through the Bakunawa encounter and return safely to the ship.",
+  "requiresAllObjectives": true,
+  "autoAdvanceObjectives": true,
+  "objectives": [
+    {
+      "objectiveName": "Reach the objective area",
+      "description": "Go to the Bakunawa objective area.",
+      "objectiveType": "FindArea",
+      "targetId": "BakunawaArena",
+      "requiredCount": 1
+    },
+    {
+      "objectiveName": "Defeat Bakunawa",
+      "description": "Defeat the Bakunawa.",
+      "objectiveType": "Kill",
+      "targetId": "Bakunawa",
+      "requiredCount": 1
+    },
+    {
+      "objectiveName": "Return to the ship",
+      "description": "Head back to the ship after the fight.",
+      "objectiveType": "ReachArea",
+      "targetId": "ReturnToShipArea",
+      "requiredCount": 1
+    }
+  ]
+}

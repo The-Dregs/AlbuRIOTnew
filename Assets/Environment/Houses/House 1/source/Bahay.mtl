@@ -1,0 +1,59 @@
+# Blender MTL File: 'Bahay.blend'
+# Material Count: 5
+
+newmtl Doork
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Blender Sample\\Sketchup pics\\New folder (20)\\33_old bamboo fence texture-seamless.jpg
+
+newmtl Material.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Blender Sample\\A1Texture Blender\\Wood\\Wood 1\\Wood062_4K_NormalDX.jpg
+map_Kd D:\\Blender Sample\\A1Texture Blender\\Wood\\Wood 1\\Wood062_4K_Color.jpg
+map_Ns D:\\Blender Sample\\A1Texture Blender\\Wood\\Wood 1\\Wood062_4K_Roughness.jpg
+
+newmtl Roof
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Blender Sample\\Sketchup pics\\New folder (19)\\TexturesCom_Thatched0069_2_seamless_S.jpg
+
+newmtl Roof._22010
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Blender Sample\\Sketchup pics\\New folder (19)\\TexturesCom_Thatched0042_1_M.jpg
+
+newmtl Wooddd
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Blender Sample\\Sketchup pics\\New folder (19)\\TexturesCom_WoodBamboo0021_M.jpg

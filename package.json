@@ -1,0 +1,26 @@
+{
+  "name": "alburiot",
+  "version": "1.0.0",
+  "description": "AlbuRIOT is a multiplayer survival game that brings Philippine mythology to life through dynamic, replayable gameplay. Players take on the role of an albularyo (folk healer) who must purify an island inhabited by mythological beings. Core systems include a power-stealing mechanic, Perlin noise-based procedural map generation, and Behavior Tree-driven enemy AI.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Dregs/AlbuRIOT.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/The-Dregs/AlbuRIOT/issues"
+  },
+  "homepage": "https://github.com/The-Dregs/AlbuRIOT#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.2",
+    "ws": "^8.18.3"
+  },
+  "type": "module"
+}

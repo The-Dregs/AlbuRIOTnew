@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49583e7f51600d243807eff9b726b809, type: 3}
+  m_Name: Bolo Knife
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: Bolo Knife
+  description: A bolo knife
+  icon: {fileID: 21300000, guid: f3bb214d04083764a93af384457d9fef, type: 3}
+  itemType: 1
+  maxStack: 1
+  healthModifier: 0
+  staminaModifier: 0
+  damageModifier: 20
+  speedModifier: 0
+  staminaCostModifier: 0
+  healAmount: 0
+  staminaRestore: 0
+  effectDuration: 0
+  isQuestItem: 1
+  questId: Bolo Knife
+  canBeOffered: 0
+  offeringValue: 1
+  grantsPower: 0
+  associatedEnemy: 
+  uniqueInstance: 0
+  pickupSound: {fileID: 0}
+  useSound: {fileID: 0}
+  pickupEffect: {fileID: 0}
+  useEffect: {fileID: 0}
+  modelPrefab: {fileID: 5737314805802655685, guid: f2d9995a14e0c974c8c15218a5c47f07, type: 3}
+  overrideTransform: 1
+  modelLocalPosition: {x: 0.009254163, y: 0.15387774, z: 0.0181099}
+  modelLocalEulerAngles: {x: 17.629568, y: 261.608, z: 176.94879}
+  modelScale: {x: 20.833866, y: 20.833866, z: 20.833866}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49583e7f51600d243807eff9b726b809, type: 3}
+  m_Name: Axe
+  m_EditorClassIdentifier: 
+  itemName: Axe
+  icon: {fileID: 21300000, guid: 390e839e1e242f444990f2f7279d3389, type: 3}
+  description: A huge ass Axe
+  maxStack: 1
+  healthModifier: 0
+  staminaModifier: 0
+  damageModifier: 20
+  speedModifier: 0
+  staminaCostModifier: 0
+  modelPrefab: {fileID: 8203073568141072114, guid: 6cd1ac9652a50da4485a86492f47c63d, type: 3}
+  modelScale: {x: 0.007, y: 0.007, z: 0.007}

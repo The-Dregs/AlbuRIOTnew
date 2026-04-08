@@ -1,0 +1,99 @@
+AlbuRIOT Terrain Testing Report
+Generated: 3/19/2026 3:16:42 AM
+Inspector parameters:
+  targetLandPercent = 40.0 %
+  roughness = 0.773
+  islandSize = 0.200
+  centerBias = 0.300
+
+Summary over 20 runs:
+  Avg land = 40.1 %
+  Avg stdDevHeight = 0.158
+  Avg radialCorrelation = 0.79
+  Avg Hurst exponent H = 0.691
+  Avg total generation time = 3157.2 ms
+
+Per-run details:
+Seed 12345 | land 40.6 % sand 59.4 % | mean 0.072 std 0.111 | corr 0.76 | H 0.691 | 2985.9 ms
+  Land coverage within ±5% of target (40.6 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 2985.9 ms is within the 10 s target.
+Seed 12346 | land 40.6 % sand 59.4 % | mean 0.109 std 0.174 | corr 0.84 | H 0.691 | 3198.3 ms
+  Land coverage within ±5% of target (40.6 % vs 40.0 %). Terrain roughness is in a moderate band. Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3198.3 ms is within the 10 s target.
+Seed 12347 | land 40.3 % sand 59.7 % | mean 0.107 std 0.172 | corr 0.84 | H 0.691 | 3093.4 ms
+  Land coverage within ±5% of target (40.3 % vs 40.0 %). Terrain roughness is in a moderate band. Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3093.4 ms is within the 10 s target.
+Seed 12348 | land 40.4 % sand 59.6 % | mean 0.087 std 0.134 | corr 0.76 | H 0.691 | 3104.4 ms
+  Land coverage within ±5% of target (40.4 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3104.4 ms is within the 10 s target.
+Seed 12349 | land 40.2 % sand 59.8 % | mean 0.106 std 0.174 | corr 0.75 | H 0.691 | 3204.2 ms
+  Land coverage within ±5% of target (40.2 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3204.2 ms is within the 10 s target.
+Seed 12350 | land 40.0 % sand 60.0 % | mean 0.117 std 0.156 | corr 0.73 | H 0.691 | 3176.3 ms
+  Land coverage within ±5% of target (40.0 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3176.3 ms is within the 10 s target.
+Seed 12351 | land 40.2 % sand 59.8 % | mean 0.091 std 0.154 | corr 0.74 | H 0.691 | 3128.5 ms
+  Land coverage within ±5% of target (40.2 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3128.5 ms is within the 10 s target.
+Seed 12352 | land 40.1 % sand 59.9 % | mean 0.108 std 0.163 | corr 0.78 | H 0.691 | 3458.7 ms
+  Land coverage within ±5% of target (40.1 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3458.7 ms is within the 10 s target.
+Seed 12353 | land 40.1 % sand 59.9 % | mean 0.091 std 0.153 | corr 0.76 | H 0.691 | 3131.1 ms
+  Land coverage within ±5% of target (40.1 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3131.1 ms is within the 10 s target.
+Seed 12354 | land 38.0 % sand 62.0 % | mean 0.115 std 0.200 | corr 0.80 | H 0.691 | 3266.9 ms
+  Land coverage within ±5% of target (38.0 % vs 40.0 %). Terrain is highly rough (check cliffs / noise). Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3266.9 ms is within the 10 s target.
+Seed 12355 | land 40.3 % sand 59.7 % | mean 0.111 std 0.195 | corr 0.82 | H 0.691 | 3139.4 ms
+  Land coverage within ±5% of target (40.3 % vs 40.0 %). Terrain is highly rough (check cliffs / noise). Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3139.4 ms is within the 10 s target.
+Seed 12356 | land 40.2 % sand 59.8 % | mean 0.091 std 0.137 | corr 0.81 | H 0.691 | 3206.9 ms
+  Land coverage within ±5% of target (40.2 % vs 40.0 %). Terrain roughness is in a moderate band. Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3206.9 ms is within the 10 s target.
+Seed 12357 | land 40.3 % sand 59.7 % | mean 0.101 std 0.149 | corr 0.79 | H 0.691 | 3316.1 ms
+  Land coverage within ±5% of target (40.3 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3316.1 ms is within the 10 s target.
+Seed 12358 | land 40.1 % sand 59.9 % | mean 0.108 std 0.145 | corr 0.80 | H 0.691 | 3226.9 ms
+  Land coverage within ±5% of target (40.1 % vs 40.0 %). Terrain roughness is in a moderate band. Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3226.9 ms is within the 10 s target.
+Seed 12359 | land 40.2 % sand 59.8 % | mean 0.110 std 0.160 | corr 0.78 | H 0.691 | 3092.4 ms
+  Land coverage within ±5% of target (40.2 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3092.4 ms is within the 10 s target.
+Seed 12360 | land 40.4 % sand 59.6 % | mean 0.108 std 0.142 | corr 0.85 | H 0.691 | 3101.0 ms
+  Land coverage within ±5% of target (40.4 % vs 40.0 %). Terrain roughness is in a moderate band. Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3101.0 ms is within the 10 s target.
+Seed 12361 | land 40.0 % sand 60.0 % | mean 0.099 std 0.156 | corr 0.81 | H 0.691 | 3082.4 ms
+  Land coverage within ±5% of target (40.0 % vs 40.0 %). Terrain roughness is in a moderate band. Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3082.4 ms is within the 10 s target.
+Seed 12362 | land 40.1 % sand 59.9 % | mean 0.109 std 0.154 | corr 0.83 | H 0.691 | 3080.1 ms
+  Land coverage within ±5% of target (40.1 % vs 40.0 %). Terrain roughness is in a moderate band. Strong coastal gradient (height decreases cleanly toward edges). Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3080.1 ms is within the 10 s target.
+Seed 12363 | land 40.5 % sand 59.5 % | mean 0.109 std 0.158 | corr 0.79 | H 0.691 | 3035.4 ms
+  Land coverage within ±5% of target (40.5 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3035.4 ms is within the 10 s target.
+Seed 12364 | land 40.0 % sand 60.0 % | mean 0.103 std 0.164 | corr 0.77 | H 0.691 | 3116.8 ms
+  Land coverage within ±5% of target (40.0 % vs 40.0 %). Terrain roughness is in a moderate band. Moderate center-to-edge height correlation. Hurst exponent H=0.691 in expected range for fBM terrain. Generation time 3116.8 ms is within the 10 s target.
+
+---
+
+Formulas used (from `Assets/Scripts/Editor/AlbuRIOTTestingWindow.cs`):
+- Formula 8.0: Terrain coverage stability (land% vs target)
+- Formulas 9.0-9.1: Roughness / height distribution (stdDevHeight bands)
+- Formula 10.0: Multi-scale self-similarity (Hurst exponent H)
+- Formula 10.1: Coastal transition validity (radialCorrelation)
+
+Research-style interpretation (model training perspective)
+
+This report can be interpreted as a multi-seed “training/evaluation dataset” describing the procedural generator’s behavior under fixed inspector parameters (targetLandPercent=40%, roughness=0.773, islandSize=0.200, centerBias=0.300). In a research setting, these metrics act as quantitative labels for terrain realism, stability, and parameter consistency.
+
+1) Terrain coverage stability (Formula 8.0)
+- Result: Avg land = 40.1% over 20 seeds, very close to the configured target (40.0%).
+- Interpretation: The generator is producing a consistent land/water ratio across seeds, which is desirable for controlled experiments (reduced variance in downstream tasks like resource placement, navigation, and encounter density). This indicates the land-percentage auto-thresholding is behaving stably for this parameter set.
+
+2) Terrain roughness / height distribution (Formulas 9.0–9.1)
+- Result: Avg stdDevHeight = 0.158 with per-seed variation (e.g., seed 12345 std=0.111 vs seed 12354 std=0.200).
+- Interpretation: Terrain complexity is generally in a “moderate” band, but there are occasional higher-roughness outliers. In model-training terms, this is useful coverage: most samples represent typical playable terrain, while a minority represent more extreme roughness that can stress-test traversal, enemy line-of-sight, and spawn constraints.
+- Practical note: Seeds with stdDevHeight ≈ 0.19–0.20 should be examined visually to confirm they do not introduce unintended cliffs/unreachable regions, especially because ISO-style integrity targets depend on playability, not just distribution statistics.
+
+3) Coastal transition validity (Pearson correlation; Formula 10.1)
+- Result: Avg radialCorrelation = 0.79 (many seeds 0.73–0.85).
+- Interpretation: This indicates a strong positive association between the island core factor and height, meaning heights tend to be higher near the center and decrease toward edges. From a research validation standpoint, this supports the claim that the falloff algorithm creates natural coastal transitions consistently across seeds.
+- Implication for downstream systems: Higher correlation tends to stabilize “edge vs inland” assumptions used by shore spawns, broken-ship placement, and water avoidance rules. Lower-correlation seeds (e.g., corr ~0.73) may correspond to noisier coastlines or inland depressions; they are valuable for robustness evaluation.
+
+4) Multi-scale self-similarity / fBM consistency (Hurst exponent; Formula 10.0)
+- Result: Avg H = 0.691 and constant across runs in this batch.
+- Interpretation: H≈0.69 suggests a terrain field with relatively smooth large-scale structure but still meaningful mid-scale variation. The fact that H is constant across these runs is expected because persistence/lacunarity are derived from a fixed roughness setting; across seeds, H measures parameterization (not randomness) rather than per-seed outcomes.
+- In a model-training context: H can serve as a conditioning variable or a regime label (e.g., “roughness setting class”), while stdDevHeight captures per-seed realized variation within that regime.
+
+5) Performance efficiency (Terrain Generation Time target)
+- Result: Avg total generation time ≈ 3.16 s, with all listed runs within the 10 s target.
+- Interpretation: This satisfies the performance constraint for repeated experimental trials. It supports running larger evaluation batches (50+ seeds) without prohibitive runtime, enabling statistically meaningful comparisons (e.g., before/after parameter changes).
+
+Overall conclusion (research framing)
+- The generator under this inspector configuration demonstrates: (a) strong control of land coverage, (b) consistent coastal falloff behavior, (c) stable multi-scale parameterization (H), and (d) acceptable generation time. This combination is suitable for model training/evaluation scenarios where you want procedural diversity across seeds while keeping macro-structure (islandness/coast transitions) consistent.
+
+Recommended next steps for a paper-grade evaluation
+- Expand the batch size (≥50 seeds) and report confidence intervals for land%, stdDevHeight, and correlation.
+- Pair the statistical metrics with an integrity/validity check (e.g., unreachable-area sampling) to support ISO 25010 “Procedural Terrain Integrity Score.”
+- If comparing generator versions, treat changes in (land%, stdDevHeight, radialCorrelation) as the primary behavioral deltas; treat H as a parameter-regime descriptor unless persistence/lacunarity mappings are changed.
