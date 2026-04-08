@@ -142,6 +142,10 @@ public static class PlayerRegistry
             return false;
 
         var pv = playerTransform.GetComponent<PhotonView>();
+        bool requireNetworkOwnership = PhotonNetwork.IsConnected && PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode;
+        if (requireNetworkOwnership)
+            return pv != null && pv.IsMine;
+
         return pv == null || pv.IsMine;
     }
 }

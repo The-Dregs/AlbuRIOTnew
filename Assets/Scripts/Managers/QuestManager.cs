@@ -239,6 +239,8 @@ public class QuestManager : MonoBehaviourPun, Photon.Pun.IPunObservable, Photon.
 
     private readonly System.Collections.Generic.List<(PlayerCombat pc, bool was)>          _lockedCombats     = new System.Collections.Generic.List<(PlayerCombat, bool)>();
     private readonly System.Collections.Generic.List<(ThirdPersonController tc, bool was)> _lockedControllers = new System.Collections.Generic.List<(ThirdPersonController, bool)>();
+    private int _activeQuestInputLockToken = -1;
+    private bool _questCutsceneUiOpened = false;
 
     [Header("Quest SFX")]
     [Tooltip("AudioSource used to play quest sound cues. If left empty, one will be created automatically.")]
@@ -2112,11 +2114,11 @@ public class QuestManager : MonoBehaviourPun, Photon.Pun.IPunObservable, Photon.
             HidePlayers();
         
         // Block pause menu and all other UIs while the cutscene runs
-        bool uiOpened = LocalUIManager.Ensure().TryOpen("QuestCutscene");
+        _questCutsceneUiOpened = LocalUIManager.Ensure().TryOpen("QuestCutscene");
 
         // Lock all local player input (movement, combat, camera) so camera doesn't respond to mouse during cutscene
         LockLocalPlayers();
-        int inputLockToken = LocalInputLocker.Ensure().Acquire("QuestCutscene", lockMovement: true, lockCombat: true, lockCamera: true, cursorUnlock: true);
+        _activeQuestInputLockToken = LocalInputLocker.Ensure().Acquire("QuestCutscene", lockMovement: true, lockCombat: true, lockCamera: true, cursorUnlock: true);
 
         try
         {
@@ -2186,20 +2188,11 @@ public class QuestManager : MonoBehaviourPun, Photon.Pun.IPunObservable, Photon.
         if (hidePlayersDuringCutscene)
             ShowPlayers();
 
-        // Release UI owner, input locks, then stop cursor enforcement
-        if (uiOpened) LocalUIManager.Instance?.Close("QuestCutscene");
-        _questCutsceneActive = false;
-        UnlockLocalPlayers();
-
-        // Re-lock cursor for gameplay
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        
-        currentCutscene = null;
+        RestoreQuestCutsceneRuntimeState(releaseInputLock: true);
         }
         finally
         {
-            LocalInputLocker.Ensure().Release(inputLockToken);
+            RestoreQuestCutsceneRuntimeState(releaseInputLock: true);
         }
     }
     
@@ -2372,6 +2365,10 @@ public class QuestManager : MonoBehaviourPun, Photon.Pun.IPunObservable, Photon.
 
     private void OnSceneUnloaded(Scene scene)
     {
+        // scene unload can interrupt cutscene coroutine before ShowPlayers()/UI restore runs.
+        // restore first, then clear references.
+        RestoreQuestCutsceneRuntimeState(releaseInputLock: true);
+
         // Drop all scene-object component references so they can be GC'd after unload
         ClearComponentLists();
         _questCutsceneActive = false;
@@ -2623,6 +2620,42 @@ public class QuestManager : MonoBehaviourPun, Photon.Pun.IPunObservable, Photon.
         _hiddenCameras.Clear();
         _lockedCombats.Clear();
         _lockedControllers.Clear();
+    }
+
+    private void RestoreQuestCutsceneRuntimeState(bool releaseInputLock)
+    {
+        if (_hiddenRenderers.Count > 0 || _hiddenCanvases.Count > 0 || _hiddenCameras.Count > 0)
+            ShowPlayers();
+
+        if (_lockedCombats.Count > 0 || _lockedControllers.Count > 0)
+            UnlockLocalPlayers();
+
+        if (_questCutsceneUiOpened)
+        {
+            LocalUIManager.Instance?.Close("QuestCutscene");
+            _questCutsceneUiOpened = false;
+        }
+
+        if (cutsceneSkipButton != null)
+            cutsceneSkipButton.SetActive(false);
+
+        if (cutsceneFadeOverlay != null)
+        {
+            cutsceneFadeOverlay.alpha = 0f;
+            cutsceneFadeOverlay.gameObject.SetActive(false);
+        }
+
+        _questCutsceneActive = false;
+        currentCutscene = null;
+
+        if (releaseInputLock && _activeQuestInputLockToken >= 0)
+        {
+            LocalInputLocker.Ensure().Release(_activeQuestInputLockToken);
+            _activeQuestInputLockToken = -1;
+        }
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void HidePlayers()

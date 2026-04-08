@@ -155,7 +155,16 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
         if (tagged != null)
         {
             var pv = tagged.GetComponent<PhotonView>();
-            if (pv == null || !PhotonNetwork.IsConnected || pv.IsMine)
+            bool requireNetworkOwnership = PhotonNetwork.IsConnected && PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode;
+            if (requireNetworkOwnership)
+            {
+                if (pv != null && pv.IsMine)
+                    return tagged;
+
+                if (pv == null)
+                    Debug.LogWarning("[TutorialSpawnManager] Ignoring non-network tagged Player while in room; spawning Photon player instead.");
+            }
+            else if (pv == null || !PhotonNetwork.IsConnected || pv.IsMine)
                 return tagged;
         }
 
