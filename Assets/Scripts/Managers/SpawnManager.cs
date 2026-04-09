@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class TutorialSpawnManager : MonoBehaviourPunCallbacks
 {
@@ -26,6 +27,8 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
     {
         Debug.Log($"[TutorialSpawnManager] ApplySpawnPlayerForThisClient called. Connected={PhotonNetwork.IsConnected}, InRoom={PhotonNetwork.InRoom}, OfflineMode={PhotonNetwork.OfflineMode}");
 
+        CleanupStaleLocalPlayersOutsideActiveScene();
+
         bool onlineConnected = PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode;
         if (onlineConnected && !PhotonNetwork.InRoom)
         {
@@ -50,6 +53,7 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
         int spawnIndex = 0;
         int prefabSlotIndex = 0;
         Vector3 spawnPos = (spawnPoints != null && spawnPoints.Length > 0) ? spawnPoints[spawnIndex].position : Vector3.zero;
+        Quaternion spawnRotation = Quaternion.identity;
         GameObject player = null;
         
         // Unified spawn logic for both online and offline
@@ -65,21 +69,39 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
             else
             {
                 spawnIndex = 0;
-                spawnPos = Vector3.zero;
-                Debug.LogWarning("[TutorialSpawnManager] No spawnPoints assigned. Spawning at origin; PlayerSpawnCoordinator should reposition to SpawnMarker_*. ");
+                // FIRSTMAP has TutorialSpawnManager.spawnPoints empty; use the same spawn-marker selection
+                // logic as PlayerSpawnCoordinator so we instantiate directly at SpawnMarker_*.
+                if (PlayerSpawnCoordinator.TryGetBestSpawnPosition(out Vector3 bestPos, out Vector3 faceDir, out string source, requireSpawnMarkers: true))
+                {
+                    spawnPos = bestPos;
+                    Vector3 flatDir = faceDir;
+                    flatDir.y = 0f;
+                    if (flatDir.sqrMagnitude > 0.0001f)
+                        spawnRotation = Quaternion.LookRotation(flatDir.normalized, Vector3.up);
+
+                    Debug.Log($"[TutorialSpawnManager] No spawnPoints assigned. Spawning at {source} directly.");
+                }
+                else
+                {
+                    spawnPos = Vector3.zero;
+                    spawnRotation = Quaternion.identity;
+                    Debug.LogWarning("[TutorialSpawnManager] No spawnPoints assigned and SpawnMarker_* not ready. Spawning at origin.");
+                }
             }
             GameObject prefab = GetPlayerPrefabForSpawnIndex(prefabSlotIndex);
             int actor = PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.ActorNumber : -1;
             Debug.Log($"[TutorialSpawnManager] Spawning player (network) actor={actor}, modelSlot={prefabSlotIndex}, spawnIndex={spawnIndex}, position={spawnPos}, prefab={prefab.name}");
-            player = PhotonNetwork.Instantiate(prefab.name, spawnPos, Quaternion.identity);
+            player = PhotonNetwork.Instantiate(prefab.name, spawnPos, spawnRotation);
         }
         else
         {
             prefabSlotIndex = 0;
             GameObject prefab = GetPlayerPrefabForSpawnIndex(prefabSlotIndex);
             Debug.Log($"[TutorialSpawnManager] Spawning player (offline/local) at index {spawnIndex}, position {spawnPos}, prefab {prefab.name}");
-            player = Instantiate(prefab, spawnPos, Quaternion.identity);
+            player = Instantiate(prefab, spawnPos, spawnRotation);
         }
+
+        player = EnsureSpawnedPlayerHasRequiredLocalUI(player, spawnPos, spawnRotation);
         
         // camera setup after spawn
         if (player != null)
@@ -137,23 +159,77 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
 
     private GameObject GetPlayerPrefabForSpawnIndex(int spawnIndex)
     {
+        GameObject selected = playerPrefab;
         switch (spawnIndex)
         {
-            case 1: return playerPrefab2 != null ? playerPrefab2 : playerPrefab;
-            case 2: return playerPrefab3 != null ? playerPrefab3 : playerPrefab;
-            case 3: return playerPrefab4 != null ? playerPrefab4 : playerPrefab;
-            default: return playerPrefab;
+            case 1: selected = playerPrefab2 != null ? playerPrefab2 : playerPrefab; break;
+            case 2: selected = playerPrefab3 != null ? playerPrefab3 : playerPrefab; break;
+            case 3: selected = playerPrefab4 != null ? playerPrefab4 : playerPrefab; break;
+            default: selected = playerPrefab; break;
         }
+
+        // Safety: if variant prefab is missing core gameplay/UI wiring, fall back to Player1.
+        if (selected != null && playerPrefab != null && selected != playerPrefab && !HasRequiredPlayerComponents(selected))
+        {
+            Debug.LogWarning($"[TutorialSpawnManager] Selected prefab '{selected.name}' is missing required player components/UI. Falling back to '{playerPrefab.name}'.");
+            return playerPrefab;
+        }
+
+        return selected;
+    }
+
+    private bool HasRequiredPlayerComponents(GameObject prefab)
+    {
+        if (prefab == null) return false;
+
+        bool hasController = prefab.GetComponent<ThirdPersonController>() != null
+            || prefab.GetComponentInChildren<ThirdPersonController>(true) != null;
+        bool hasStats = prefab.GetComponent<PlayerStats>() != null
+            || prefab.GetComponentInChildren<PlayerStats>(true) != null;
+        bool hasInventoryUI = prefab.GetComponentInChildren<InventoryUI>(true) != null;
+        bool hasQuestListUI = prefab.GetComponentInChildren<QuestListUI>(true) != null;
+
+        return hasController && hasStats && hasInventoryUI && hasQuestListUI;
+    }
+
+    private GameObject EnsureSpawnedPlayerHasRequiredLocalUI(GameObject spawnedPlayer, Vector3 spawnPos, Quaternion spawnRotation)
+    {
+        if (spawnedPlayer == null || playerPrefab == null)
+            return spawnedPlayer;
+
+        var pv = spawnedPlayer.GetComponent<PhotonView>();
+        bool isLocalOwner = pv == null || pv.IsMine;
+        if (!isLocalOwner)
+            return spawnedPlayer;
+
+        if (HasRequiredPlayerComponents(spawnedPlayer))
+            return spawnedPlayer;
+
+        Debug.LogWarning($"[TutorialSpawnManager] Spawned player '{spawnedPlayer.name}' is missing required local UI/gameplay components. Re-spawning with '{playerPrefab.name}'.");
+
+        if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
+        {
+            if (pv != null && pv.IsMine)
+                PhotonNetwork.Destroy(spawnedPlayer);
+            return PhotonNetwork.Instantiate(playerPrefab.name, spawnPos, spawnRotation);
+        }
+
+        Destroy(spawnedPlayer);
+        return Instantiate(playerPrefab, spawnPos, spawnRotation);
     }
 
     private GameObject FindExistingLocalPlayer()
     {
+        Scene activeScene = SceneManager.GetActiveScene();
         var t = PlayerRegistry.GetLocalPlayerTransform();
-        if (t != null) return t.gameObject;
+        if (t != null && t.gameObject.scene == activeScene) return t.gameObject;
 
         var tagged = GameObject.FindGameObjectWithTag("Player");
         if (tagged != null)
         {
+            if (tagged.scene != activeScene)
+                return null;
+
             var pv = tagged.GetComponent<PhotonView>();
             bool requireNetworkOwnership = PhotonNetwork.IsConnected && PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode;
             if (requireNetworkOwnership)
@@ -169,5 +245,21 @@ public class TutorialSpawnManager : MonoBehaviourPunCallbacks
         }
 
         return null;
+    }
+
+    private void CleanupStaleLocalPlayersOutsideActiveScene()
+    {
+        Scene activeScene = SceneManager.GetActiveScene();
+        var allViews = FindObjectsByType<PhotonView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < allViews.Length; i++)
+        {
+            PhotonView view = allViews[i];
+            if (view == null || !view.IsMine) continue;
+            if (view.gameObject.scene == activeScene) continue;
+            if (!view.CompareTag("Player")) continue;
+
+            Debug.Log($"[TutorialSpawnManager] Removing stale local player from non-active scene before spawn: {view.gameObject.name}");
+            Destroy(view.gameObject);
+        }
     }
 }

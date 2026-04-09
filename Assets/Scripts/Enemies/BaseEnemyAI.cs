@@ -210,8 +210,7 @@ public abstract class BaseEnemyAI : MonoBehaviourPun, IEnemyDamageable, IPunObse
         if (globalBusyTimer > 0f)
             globalBusyTimer -= Time.deltaTime;
         
-        if (showDebugInfo)
-            LogDebugState();
+        // keep visual overhead debug info, but avoid frequent console spam from AI ticks.
         
         if (behaviorTree != null)
         {
@@ -219,20 +218,7 @@ public abstract class BaseEnemyAI : MonoBehaviourPun, IEnemyDamageable, IPunObse
         }
     }
     
-    private float _lastDebugLogTime = -999f;
-    private const float DebugLogInterval = 0.5f;
-    private void LogDebugState()
-    {
-        if (Time.time - _lastDebugLogTime < DebugLogInterval) return;
-        _lastDebugLogTime = Time.time;
-        bool exhausted = IsRotationLocked();
-        string tgt = targetPlayer != null ? targetPlayer.name : "null";
-        float dist = targetPlayer != null ? Vector3.Distance(transform.position, targetPlayer.position) : -1f;
-        string extra = GetExtraDebugInfo();
-        Debug.Log($"[{gameObject.name}] State:{GetEffectiveStateForDebug()} (aiState:{aiState}) isBusy:{isBusy} globalBusy:{globalBusyTimer:F1}s attackLock:{attackLockTimer:F1}s exhausted:{exhausted} target:{tgt} dist:{dist:F1}{extra}");
-    }
-
-    /// <summary>Override in derived classes to append skill cooldowns etc. to debug logs. Include leading space if non-empty.</summary>
+    /// <summary>Override in derived classes to append skill cooldowns etc. to debug overlays. Include leading space if non-empty.</summary>
     protected virtual string GetExtraDebugInfo() => "";
 
     /// <summary>Ensure enemy AudioSource uses 3D spatial audio so sounds attenuate with distance.</summary>

@@ -194,7 +194,7 @@ public class BakunawaAI : BaseEnemyAI
 
     [Header("Debug")]
     [Tooltip("Log to console when Bakunawa starts a move and when AI state changes.")]
-    public bool showBakunawaDebugLogs = true;
+    public bool showBakunawaDebugLogs = false;
 
     private Quaternion bodyTargetWorldRot;
     private Quaternion tailTargetWorldRot;
@@ -227,15 +227,11 @@ public class BakunawaAI : BaseEnemyAI
     protected override void Awake()
     {
         base.Awake();
-        Debug.Log("[Bakunawa] Awake on " + gameObject.name);
     }
 
     private void Start()
     {
-        bool offline = !PhotonNetwork.IsConnected || PhotonNetwork.OfflineMode;
-        bool aiWillRun = offline || PhotonNetwork.IsMasterClient;
-        Debug.Log("[Bakunawa] " + gameObject.name + " | AI " + (aiWillRun ? "ACTIVE" : "INACTIVE (not MasterClient)") +
-            " | Offline=" + offline + " InRoom=" + (PhotonNetwork.IsConnected && PhotonNetwork.InRoom) + " IsMasterClient=" + PhotonNetwork.IsMasterClient);
+        // intentionally left empty
     }
 
     protected override void BuildBehaviorTree()
@@ -372,17 +368,7 @@ public class BakunawaAI : BaseEnemyAI
 
         base.Update();
 
-        if (!showBakunawaDebugLogs) return;
-        string activity = GetCurrentActivityString();
-        // When exhausted, prioritize showing Exhausted (aiState becomes Idle from EndAction)
-        string effectiveState = IsHeadExhausted() ? "Exhausted" : aiState.ToString();
-        if (activity != lastLoggedActivity || effectiveState != lastLoggedStateStr)
-        {
-            lastLoggedState = aiState;
-            lastLoggedActivity = activity;
-            lastLoggedStateStr = effectiveState;
-            Debug.Log("[Bakunawa] State: " + effectiveState + " | Activity: " + activity);
-        }
+        // do not emit per-state console logs from Update (too noisy in gameplay).
     }
 
     public override string GetEffectiveStateForDebug()

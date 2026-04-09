@@ -2,8 +2,12 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine.SceneManagement;
+using ExitGames.Client.Photon;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
@@ -68,6 +72,10 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     private GUIStyle debugOverlayTextStyle;
     private GUIStyle debugOverlayTitleStyle;
     private readonly StringBuilder debugOverlayLineBuilder = new StringBuilder(512);
+    private bool isSceneTransitionInProgress = false;
+    private string transitionTargetScene = string.Empty;
+    private const string TRANSITION_SCENE_READY_KEY = "NMTransitionSceneReady";
+    private const string TRANSITION_SPAWN_READY_KEY = "NMTransitionSpawnReady";
     
     void Awake()
     {
@@ -431,6 +439,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         {
             player = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
         }
+
+        player = EnsureSpawnedPlayerHasRequiredLocalUI(player, spawnPosition);
         
         Debug.Log($"Player spawned at: {spawnPosition}");
     }
@@ -448,13 +458,63 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     private GameObject GetPlayerPrefabByIndex(int index)
     {
+        GameObject selected = playerPrefab;
         switch (index)
         {
-            case 1: return playerPrefab2 != null ? playerPrefab2 : playerPrefab;
-            case 2: return playerPrefab3 != null ? playerPrefab3 : playerPrefab;
-            case 3: return playerPrefab4 != null ? playerPrefab4 : playerPrefab;
-            default: return playerPrefab;
+            case 1: selected = playerPrefab2 != null ? playerPrefab2 : playerPrefab; break;
+            case 2: selected = playerPrefab3 != null ? playerPrefab3 : playerPrefab; break;
+            case 3: selected = playerPrefab4 != null ? playerPrefab4 : playerPrefab; break;
+            default: selected = playerPrefab; break;
         }
+
+        // Safety fallback for variant prefabs that are missing local HUD/UI wiring.
+        if (selected != null && playerPrefab != null && selected != playerPrefab && !HasRequiredPlayerComponents(selected))
+        {
+            Debug.LogWarning($"[NetworkManager] Selected prefab '{selected.name}' is missing required player components/UI. Falling back to '{playerPrefab.name}'.");
+            return playerPrefab;
+        }
+
+        return selected;
+    }
+
+    private bool HasRequiredPlayerComponents(GameObject prefab)
+    {
+        if (prefab == null) return false;
+
+        bool hasController = prefab.GetComponent<ThirdPersonController>() != null
+            || prefab.GetComponentInChildren<ThirdPersonController>(true) != null;
+        bool hasStats = prefab.GetComponent<PlayerStats>() != null
+            || prefab.GetComponentInChildren<PlayerStats>(true) != null;
+        bool hasInventoryUI = prefab.GetComponentInChildren<InventoryUI>(true) != null;
+        bool hasQuestListUI = prefab.GetComponentInChildren<QuestListUI>(true) != null;
+
+        return hasController && hasStats && hasInventoryUI && hasQuestListUI;
+    }
+
+    private GameObject EnsureSpawnedPlayerHasRequiredLocalUI(GameObject spawnedPlayer, Vector3 spawnPosition)
+    {
+        if (spawnedPlayer == null || playerPrefab == null)
+            return spawnedPlayer;
+
+        var pv = spawnedPlayer.GetComponent<PhotonView>();
+        bool isLocalOwner = pv == null || pv.IsMine;
+        if (!isLocalOwner)
+            return spawnedPlayer;
+
+        if (HasRequiredPlayerComponents(spawnedPlayer))
+            return spawnedPlayer;
+
+        Debug.LogWarning($"[NetworkManager] Spawned player '{spawnedPlayer.name}' is missing required local UI/gameplay components. Re-spawning with '{playerPrefab.name}'.");
+
+        if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
+        {
+            if (pv != null && pv.IsMine)
+                PhotonNetwork.Destroy(spawnedPlayer);
+            return PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
+        }
+
+        Destroy(spawnedPlayer);
+        return Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
     }
 
     private Vector3 GetSpawnPosition()
@@ -472,6 +532,226 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         return Vector3.zero;
     }
     
+    #endregion
+
+    #region Scene Transition
+
+    public static bool BeginSceneTransition(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+            return false;
+
+        if (Instance == null)
+        {
+            Debug.LogWarning($"[NetworkManager] BeginSceneTransition('{sceneName}') failed: no NetworkManager instance.");
+            return false;
+        }
+
+        return Instance.BeginSceneTransitionInternal(sceneName);
+    }
+
+    private bool BeginSceneTransitionInternal(string sceneName)
+    {
+        if (isSceneTransitionInProgress)
+        {
+            Debug.LogWarning($"[NetworkManager] Transition already in progress to '{transitionTargetScene}'. Ignoring '{sceneName}'.");
+            return false;
+        }
+
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && !PhotonNetwork.InRoom)
+        {
+            Debug.LogError($"[NetworkManager] Cannot transition to '{sceneName}' while connected but not in room.");
+            return false;
+        }
+
+        StartCoroutine(Co_BeginSceneTransition(sceneName));
+        return true;
+    }
+
+    private IEnumerator Co_BeginSceneTransition(string sceneName)
+    {
+        isSceneTransitionInProgress = true;
+        transitionTargetScene = sceneName;
+        PlayerSpawnManager.hasTeleportedByLoader = false;
+        CutsceneManager.SetTransitionControlledStart(true);
+        PlayerSpawnCoordinator.CleanupStaleLocalPlayersOutsideActiveScene(enableDebugLogs: true, logPrefix: "[NetworkManagerTransition]");
+
+        Inventory.CacheLocalInventory();
+        EquipmentManager.CacheLocalEquipment();
+
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom)
+        {
+            // reset local transition flags for this handoff
+            if (PhotonNetwork.LocalPlayer != null)
+            {
+                var clear = new Hashtable
+                {
+                    { TRANSITION_SCENE_READY_KEY, null },
+                    { TRANSITION_SPAWN_READY_KEY, null }
+                };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(clear);
+            }
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.LoadLevel(sceneName);
+            }
+
+            float loadTimeout = 90f;
+            float elapsed = 0f;
+            while (SceneManager.GetActiveScene().name != sceneName && elapsed < loadTimeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            if (SceneManager.GetActiveScene().name != sceneName)
+            {
+                Debug.LogError($"[NetworkManager] Timed out waiting for scene '{sceneName}'.");
+                isSceneTransitionInProgress = false;
+                yield break;
+            }
+
+            yield return StartCoroutine(Co_MarkAndWaitAllPlayers(TRANSITION_SCENE_READY_KEY, 45f));
+        }
+        else
+        {
+            SceneManager.LoadScene(sceneName);
+            while (SceneManager.GetActiveScene().name != sceneName)
+                yield return null;
+        }
+
+        yield return null;
+        PlayerSpawnCoordinator.CleanupStaleLocalPlayersOutsideActiveScene(enableDebugLogs: true, logPrefix: "[NetworkManagerTransition]");
+
+        CutsceneManager startCutscene = FindStartSceneCutsceneManager();
+        if (startCutscene != null)
+        {
+            startCutscene.BeginStartSceneSequence();
+            float maxWait = 120f;
+            float elapsed = 0f;
+            while (startCutscene != null && !startCutscene.IsStartSequenceComplete && elapsed < maxWait)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+        }
+        else
+        {
+            yield return PlayerSpawnCoordinator.EnsureLocalPlayerAtSpawn(
+                maxWaitSeconds: 20f,
+                waitForSpawnMarkers: true,
+                enableDebugLogs: true,
+                logPrefix: "[NetworkManagerTransition]");
+        }
+
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom)
+        {
+            yield return StartCoroutine(Co_MarkAndWaitAllPlayers(TRANSITION_SPAWN_READY_KEY, 45f));
+            if (PhotonNetwork.LocalPlayer != null)
+            {
+                var clear = new Hashtable
+                {
+                    { TRANSITION_SCENE_READY_KEY, null },
+                    { TRANSITION_SPAWN_READY_KEY, null }
+                };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(clear);
+            }
+        }
+
+        // Defensive finalization: ensure local gameplay input is restored after scene handoff.
+        // This covers stuck lock-owner cases (e.g., Tutorial / transition tokens lingering on host).
+        yield return null;
+        RestoreLocalGameplayAfterTransition();
+
+        isSceneTransitionInProgress = false;
+        transitionTargetScene = string.Empty;
+    }
+
+    private void RestoreLocalGameplayAfterTransition()
+    {
+        var locker = LocalInputLocker.Ensure();
+        if (locker != null)
+        {
+            locker.ReleaseAllForOwner("Tutorial");
+            locker.ReleaseAllForOwner("QuestCutscene");
+            locker.ReleaseAllForOwner("AreaCutscene");
+            locker.ReleaseAllForOwner("PostQuestSceneTransition");
+            locker.ReleaseAllForOwner("PauseMenu");
+            locker.ReleaseAllForOwner("NPCDialogue");
+            locker.ReleaseAllForOwner("NunoShop");
+            locker.ForceGameplayCursor();
+        }
+
+        GameObject localPlayer = PlayerSpawnCoordinator.FindLocalPlayer();
+        if (localPlayer == null)
+            return;
+
+        var controller = localPlayer.GetComponent<ThirdPersonController>() ?? localPlayer.GetComponentInChildren<ThirdPersonController>(true);
+        if (controller != null)
+        {
+            controller.SetCanMove(true);
+            controller.SetCanControl(true);
+        }
+
+        var combat = localPlayer.GetComponent<PlayerCombat>() ?? localPlayer.GetComponentInChildren<PlayerCombat>(true);
+        if (combat != null)
+        {
+            combat.enabled = true;
+            combat.SetCanControl(true);
+        }
+    }
+
+    private IEnumerator Co_MarkAndWaitAllPlayers(string key, float timeout)
+    {
+        if (PhotonNetwork.LocalPlayer != null)
+        {
+            var props = new Hashtable { { key, true } };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        }
+
+        float elapsed = 0f;
+        while (elapsed < timeout)
+        {
+            if (AreAllPlayersFlagged(key))
+                yield break;
+
+            elapsed += 0.25f;
+            yield return new WaitForSeconds(0.25f);
+        }
+        Debug.LogWarning($"[NetworkManager] Timed out waiting for all players on '{key}'. Continuing.");
+    }
+
+    private bool AreAllPlayersFlagged(string key)
+    {
+        if (PhotonNetwork.CurrentRoom == null) return true;
+        var players = PhotonNetwork.PlayerList;
+        if (players == null || players.Length == 0) return true;
+
+        for (int i = 0; i < players.Length; i++)
+        {
+            var p = players[i];
+            if (p == null || p.CustomProperties == null || !p.CustomProperties.ContainsKey(key))
+                return false;
+            if (!(bool)p.CustomProperties[key])
+                return false;
+        }
+
+        return true;
+    }
+
+    private CutsceneManager FindStartSceneCutsceneManager()
+    {
+        var cutsceneManagers = FindObjectsByType<CutsceneManager>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < cutsceneManagers.Length; i++)
+        {
+            var manager = cutsceneManagers[i];
+            if (manager != null && manager.cutsceneMode == CutsceneMode.StartScene)
+                return manager;
+        }
+        return null;
+    }
+
     #endregion
     
     #region Game State Management

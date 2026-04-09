@@ -86,6 +86,25 @@ void Start()
             return;
         }
 
+        // Multiplayer must use the unified NetworkManager scene-transition flow.
+        // Do not run the legacy carryover coroutine in network rooms.
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode)
+        {
+            if (!PhotonNetwork.InRoom)
+            {
+                Debug.LogWarning("[ProceduralMapLoader] Ignoring legacy map-load request while connected but not in room.");
+                return;
+            }
+
+            Inventory.CacheLocalInventory();
+            EquipmentManager.CacheLocalEquipment();
+            if (!NetworkManager.BeginSceneTransition(targetMapSceneName))
+            {
+                Debug.LogWarning($"[ProceduralMapLoader] NetworkManager.BeginSceneTransition failed for '{targetMapSceneName}'.");
+            }
+            return;
+        }
+
         StartCoroutine(Co_LoadMapAndSpawnPlayer());
     }
 
@@ -648,23 +667,17 @@ void Start()
             Debug.Log($"[ProceduralMapLoader] Trigger activated! Loading map: {targetMapSceneName}");
         }
 
-        // in multiplayer, route through MapTransitionManager so ALL clients
-        // get the full transition flow (inventory caching, loading UI, spawn).
-        // the local ProceduralMapLoader coroutine is NOT used — MapTransitionManager
-        // handles everything including PhotonNetwork.LoadLevel on the master.
+        // in multiplayer, route through NetworkManager unified transition flow.
         if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom)
         {
             Inventory.CacheLocalInventory();
             EquipmentManager.CacheLocalEquipment();
 
-            if (QuestManager.Instance != null)
+            if (!NetworkManager.BeginSceneTransition(targetMapSceneName))
             {
-                QuestManager.Instance.RequestNetworkedMapTransition(targetMapSceneName);
-            }
-            else
-            {
-                // fallback: start transition locally (master's LoadLevel will auto-sync)
-                MapTransitionManager.BeginTransition(targetMapSceneName);
+                // fallback: request via quest manager network RPC path
+                if (QuestManager.Instance != null)
+                    QuestManager.Instance.RequestNetworkedMapTransition(targetMapSceneName);
             }
         }
         else

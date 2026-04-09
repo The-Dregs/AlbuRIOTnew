@@ -86,6 +86,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
     private Image runtimeFadeImage;
     private GameObject runtimeSkipCanvas;
     private GameObject runtimeLoadingCanvas;
+    private int cutsceneCursorLockToken;
     private bool createdLoadingPanelAtRuntime;
     public bool IsStartSequenceComplete { get; private set; }
 
@@ -105,6 +106,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
     private Coroutine exitButtonDelayCoroutine;
     private bool isExiting = false;
     private const string READY_KEY = "CutsceneReady";
+    private const string SPAWN_READY_KEY = "CutsceneSpawnReady";
 
     void Awake()
     {
@@ -172,6 +174,12 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         if (startSequenceStarted) return;
         startSequenceStarted = true;
         IsStartSequenceComplete = false;
+        AcquireCutsceneCursorLock();
+
+        // Safety for map transitions: if a local player carried over into this scene,
+        // hide it immediately so it cannot move/fall during the start cutscene.
+        // A fresh local player is spawned at the end of the start-scene sequence.
+        HideExistingLocalPlayersForStartScene();
 
         // pause day/night cycle until cutscene + spawn completes
         if (DayNightCycleManager.Instance != null)
@@ -213,7 +221,17 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
             }
             else
             {
-                Debug.Log("[CutsceneManager] Waiting for master to start start-scene cutscene RPC.");
+                // If this CutsceneManager instance has no PhotonView, RPCs won't reach this client.
+                // Start locally and rely on the "all players ready" barrier inside FadeInThenPlayCutscene()
+                // to keep everyone in sync.
+                if (photonView == null)
+                {
+                    StartCoroutine(FadeInThenPlayCutscene());
+                }
+                else
+                {
+                    Debug.Log("[CutsceneManager] Waiting for master to start start-scene cutscene RPC.");
+                }
             }
         }
         else if (PhotonNetwork.OfflineMode && PhotonNetwork.InRoom && photonView != null)
@@ -741,7 +759,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         // clear ready property before disconnecting
         if (PhotonNetwork.InRoom && PhotonNetwork.LocalPlayer != null)
         {
-            var props = new Hashtable { { READY_KEY, null } };
+            var props = new Hashtable { { READY_KEY, null }, { SPAWN_READY_KEY, null } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
@@ -840,16 +858,65 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         return true;
     }
 
+    private IEnumerator WaitForAllPlayersSpawnReady()
+    {
+        // Skip multiplayer barrier for offline/single-player.
+        if (!PhotonNetwork.IsConnected || PhotonNetwork.OfflineMode || !PhotonNetwork.InRoom)
+            yield break;
+
+        // Mark local player as "finished cutscene + ready to spawn".
+        if (PhotonNetwork.LocalPlayer != null)
+        {
+            var props = new Hashtable { { SPAWN_READY_KEY, true } };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        }
+
+        float timeout = 30f;
+        float elapsed = 0f;
+
+        while (elapsed < timeout)
+        {
+            if (AllPlayersSpawnReady())
+                break;
+
+            elapsed += 0.25f;
+            yield return new WaitForSeconds(0.25f);
+        }
+
+        if (elapsed >= timeout)
+            Debug.LogWarning("[CutsceneManager] Timed out waiting for all players to be spawn-ready — proceeding anyway.");
+    }
+
+    private bool AllPlayersSpawnReady()
+    {
+        if (PhotonNetwork.CurrentRoom == null) return true;
+        if (PhotonNetwork.OfflineMode) return true;
+
+        var players = PhotonNetwork.PlayerList;
+        if (players == null || players.Length == 0) return true;
+
+        foreach (var player in players)
+        {
+            if (player.CustomProperties == null || !player.CustomProperties.ContainsKey(SPAWN_READY_KEY))
+                return false;
+            if (!(bool)player.CustomProperties[SPAWN_READY_KEY])
+                return false;
+        }
+
+        return true;
+    }
+
     #endregion
 
     private void OnDestroy()
     {
+        ReleaseCutsceneCursorLock();
         StopLoadingDots();
 
         // skip if we already cleaned up during exit
         if (!isExiting && PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InRoom && PhotonNetwork.LocalPlayer != null)
         {
-            var props = new Hashtable { { READY_KEY, null } };
+            var props = new Hashtable { { READY_KEY, null }, { SPAWN_READY_KEY, null } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
@@ -897,6 +964,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
     public void RPC_SkipCutscene()
     {
         cutsceneSkipped = true;
+        AcquireCutsceneCursorLock();
         if (cutsceneDirector != null)
         {
             cutsceneDirector.Stop();
@@ -907,6 +975,18 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         // or block gameplay objects even if coroutines were interrupted.
         DisableCutsceneParentByName();
         EnableCutsceneObjects(false);
+
+        // Skip can interrupt coroutine cleanup paths; force-release stale input owners now.
+        var locker = LocalInputLocker.Ensure();
+        if (locker != null)
+        {
+            locker.ReleaseAllForOwner("CutsceneManager");
+            locker.ReleaseAllForOwner("Tutorial");
+            locker.ReleaseAllForOwner("QuestCutscene");
+            locker.ReleaseAllForOwner("AreaCutscene");
+            locker.ReleaseAllForOwner("PostQuestSceneTransition");
+        }
+        cutsceneCursorLockToken = 0;
         
         if (cutsceneMode == CutsceneMode.StartScene)
         {
@@ -941,6 +1021,7 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
 
     IEnumerator PlayEndingCutsceneCoroutine()
     {
+        AcquireCutsceneCursorLock();
         EnableCutsceneObjects(true);
 
         EnsureRuntimeFadeOverlay(startBlack: false);
@@ -984,29 +1065,37 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
             yield break;
         }
         
-        // lock all local players' movement and persist them across scenes
-        LockAndPersistAllLocalPlayers();
+        // No player carryover: just clear lingering transition/cutscene locks before unified handoff.
+        var locker = LocalInputLocker.Ensure();
+        if (locker != null)
+        {
+            locker.ReleaseAllForOwner("Tutorial");
+            locker.ReleaseAllForOwner("QuestCutscene");
+            locker.ReleaseAllForOwner("AreaCutscene");
+            locker.ReleaseAllForOwner("PostQuestSceneTransition");
+        }
+        PlayerSpawnCoordinator.CleanupStaleLocalPlayersOutsideActiveScene(enableDebugLogs: true, logPrefix: "[CutsceneManager->Transition]");
         
         yield return new WaitForEndOfFrame();
         
-        bool isHost = PhotonNetwork.OfflineMode || PhotonNetwork.IsMasterClient;
-        if (!isHost)
+        bool isOnlineRoom = PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom;
+        if (!NetworkManager.BeginSceneTransition(nextSceneName))
         {
-            yield break;
+            if (isOnlineRoom)
+            {
+                Debug.LogError($"[CutsceneManager] NetworkManager.BeginSceneTransition failed for '{nextSceneName}' in online room. Aborting fallback load to avoid duplicate spawns.");
+                yield break;
+            }
+
+            if (SceneLoader.Instance != null)
+                SceneLoader.Instance.LoadScene(nextSceneName);
+            else if (PhotonNetwork.IsConnectedAndReady || PhotonNetwork.OfflineMode)
+                PhotonNetwork.LoadLevel(nextSceneName);
+            else
+                SceneManager.LoadScene(nextSceneName);
         }
-        
-        if (SceneLoader.Instance != null)
-        {
-            SceneLoader.Instance.LoadScene(nextSceneName);
-        }
-        else if (PhotonNetwork.IsConnectedAndReady || PhotonNetwork.OfflineMode)
-        {
-            PhotonNetwork.LoadLevel(nextSceneName);
-        }
-        else
-        {
-            SceneManager.LoadScene(nextSceneName);
-        }
+
+        ReleaseCutsceneCursorLock();
     }
 
     IEnumerator TransitionToNextSceneImmediate()
@@ -1020,31 +1109,39 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
             yield break;
         }
         
-        // lock all local players' movement and persist them across scenes
-        LockAndPersistAllLocalPlayers();
-        
-        bool isHost = PhotonNetwork.OfflineMode || PhotonNetwork.IsMasterClient;
-        if (!isHost)
+        // No player carryover: just clear lingering transition/cutscene locks before unified handoff.
+        var locker = LocalInputLocker.Ensure();
+        if (locker != null)
         {
-            yield break;
+            locker.ReleaseAllForOwner("Tutorial");
+            locker.ReleaseAllForOwner("QuestCutscene");
+            locker.ReleaseAllForOwner("AreaCutscene");
+            locker.ReleaseAllForOwner("PostQuestSceneTransition");
         }
+        PlayerSpawnCoordinator.CleanupStaleLocalPlayersOutsideActiveScene(enableDebugLogs: true, logPrefix: "[CutsceneManager->TransitionImmediate]");
         
         EnsureRuntimeFadeOverlay(startBlack: true);
         
         yield return new WaitForSeconds(0.3f);
-        
-        if (SceneLoader.Instance != null)
+
+        bool isOnlineRoomImmediate = PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && PhotonNetwork.InRoom;
+        if (!NetworkManager.BeginSceneTransition(nextSceneName))
         {
-            SceneLoader.Instance.LoadScene(nextSceneName);
+            if (isOnlineRoomImmediate)
+            {
+                Debug.LogError($"[CutsceneManager] NetworkManager.BeginSceneTransition failed for '{nextSceneName}' in online room (immediate). Aborting fallback load to avoid duplicate spawns.");
+                yield break;
+            }
+
+            if (SceneLoader.Instance != null)
+                SceneLoader.Instance.LoadScene(nextSceneName);
+            else if (PhotonNetwork.IsConnectedAndReady || PhotonNetwork.OfflineMode)
+                PhotonNetwork.LoadLevel(nextSceneName);
+            else
+                SceneManager.LoadScene(nextSceneName);
         }
-        else if (PhotonNetwork.IsConnectedAndReady || PhotonNetwork.OfflineMode)
-        {
-            PhotonNetwork.LoadLevel(nextSceneName);
-        }
-        else
-        {
-            SceneManager.LoadScene(nextSceneName);
-        }
+
+        ReleaseCutsceneCursorLock();
     }
 
     IEnumerator PlayCutsceneThenSpawn()
@@ -1107,9 +1204,13 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         // Restore GameObject states after cutscene
         EnableCutsceneObjects(false);
         
+        // Ensure nobody spawns their player until every client has finished the same start cutscene.
+        yield return StartCoroutine(WaitForAllPlayersSpawnReady());
+
         // No fade out - just spawn player directly
         // Spawn player and wait for setup to complete
         yield return StartCoroutine(SpawnAndSetupPlayerCoroutine());
+        ReleaseCutsceneCursorLock();
 
         IsStartSequenceComplete = true;
         TransitionControlledStart = false;
@@ -1140,9 +1241,13 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         // restore transforms that were animated by the timeline (e.g. NPC_Nuno position)
         RestoreTransformsAfterCutscene();
 
+        // Ensure nobody spawns their player until every client has finished the same start cutscene.
+        yield return StartCoroutine(WaitForAllPlayersSpawnReady());
+
         // No fade out when skipping - just spawn player directly
         // Spawn player and wait for setup to complete
         yield return StartCoroutine(SpawnAndSetupPlayerCoroutine());
+        ReleaseCutsceneCursorLock();
 
         IsStartSequenceComplete = true;
         TransitionControlledStart = false;
@@ -1311,11 +1416,12 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         objectsStateChanged = enable;
     }
 
-    // locks movement and only persists local players for offline/singleplayer flows
+    // locks movement for local players during scene handoff.
+    // IMPORTANT: do not persist player objects across scenes here.
+    // FIRSTMAP uses a fresh spawn flow after start cutscene; persisting old players
+    // causes duplicate/stale local players and broken HUD ownership/binding.
     private void LockAndPersistAllLocalPlayers()
     {
-        bool allowPersistAcrossScenes = !PhotonNetwork.IsConnected || PhotonNetwork.OfflineMode;
-
         var allPlayers = PlayerRegistry.All;
         if (allPlayers != null && allPlayers.Count > 0)
         {
@@ -1331,12 +1437,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
                 {
                     controller.SetCanMove(false);
                     controller.SetCanControl(false);
-                }
-
-                if (allowPersistAcrossScenes)
-                {
-                    DontDestroyOnLoad(ps.gameObject);
-                    Debug.Log($"[CutsceneManager] Persisted local player: {ps.gameObject.name}");
                 }
             }
         }
@@ -1356,12 +1456,6 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
                 {
                     controller.SetCanMove(false);
                     controller.SetCanControl(false);
-                }
-
-                if (allowPersistAcrossScenes)
-                {
-                    DontDestroyOnLoad(go);
-                    Debug.Log($"[CutsceneManager] Persisted local player (tag fallback): {go.name}");
                 }
             }
         }
@@ -1400,6 +1494,42 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
                 waitForSpawnMarkers: true,
                 enableDebugLogs: true,
                 logPrefix: "[CutsceneManager]");
+        }
+    }
+
+    private void HideExistingLocalPlayersForStartScene()
+    {
+        PlayerSpawnCoordinator.CleanupStaleLocalPlayersOutsideActiveScene(enableDebugLogs: true, logPrefix: "[CutsceneManager]");
+
+        if (!PhotonNetwork.IsConnected || PhotonNetwork.OfflineMode || !PhotonNetwork.InRoom)
+            return;
+
+        var allPlayers = PlayerRegistry.All;
+        for (int i = 0; i < allPlayers.Count; i++)
+        {
+            var ps = allPlayers[i];
+            if (ps == null) continue;
+
+            PhotonView pv = ps.GetComponent<PhotonView>();
+            if (pv == null || !pv.IsMine)
+                continue;
+
+            var go = ps.gameObject;
+            // Hard-delete carried-over local players so transition always uses fresh spawn.
+            Object.Destroy(go);
+            Debug.Log($"[CutsceneManager] Destroyed carried-over local player before start-scene spawn: {go.name}");
+        }
+
+        // Extra fallback in case a local player exists but is not currently in PlayerRegistry.
+        var tagged = GameObject.FindWithTag("Player");
+        if (tagged != null)
+        {
+            var pv = tagged.GetComponent<PhotonView>();
+            if (pv != null && pv.IsMine && tagged.activeSelf)
+            {
+                Object.Destroy(tagged);
+                Debug.Log($"[CutsceneManager] Destroyed tagged carried-over local player before start-scene spawn: {tagged.name}");
+            }
         }
     }
 
@@ -1510,5 +1640,38 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
         {
             Debug.LogWarning("[CutsceneManager] Player not found after spawn attempt. It may have been spawned elsewhere.");
         }
+    }
+
+    private void AcquireCutsceneCursorLock()
+    {
+        if (cutsceneCursorLockToken != 0)
+            return;
+
+        var locker = LocalInputLocker.Ensure();
+        if (locker == null)
+            return;
+
+        cutsceneCursorLockToken = locker.Acquire(
+            ownerTag: "CutsceneManager",
+            lockMovement: true,
+            lockCombat: true,
+            lockCamera: true,
+            cursorUnlock: true);
+    }
+
+    private void ReleaseCutsceneCursorLock()
+    {
+        var locker = LocalInputLocker.Ensure();
+        if (locker != null)
+        {
+            if (cutsceneCursorLockToken != 0)
+                locker.Release(cutsceneCursorLockToken);
+            // Also clear any stale request that used the same owner tag
+            // (e.g., skip interrupted coroutine before token bookkeeping finished).
+            locker.ReleaseAllForOwner("CutsceneManager");
+            locker.ForceGameplayCursor();
+        }
+
+        cutsceneCursorLockToken = 0;
     }
 }

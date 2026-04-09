@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public static class PlayerSpawnCoordinator
 {
@@ -15,6 +16,8 @@ public static class PlayerSpawnCoordinator
         bool enableDebugLogs = true,
         string logPrefix = "[PlayerSpawnCoordinator]")
     {
+        CleanupStaleLocalPlayersOutsideActiveScene(enableDebugLogs, logPrefix);
+
         float elapsed = 0f;
         float nextTutorialSpawnAttempt = 0f;
         float nextNetworkSpawnAttempt = 0.75f;
@@ -87,6 +90,32 @@ public static class PlayerSpawnCoordinator
         }
     }
 
+    public static void CleanupStaleLocalPlayersOutsideActiveScene(bool enableDebugLogs = true, string logPrefix = "[PlayerSpawnCoordinator]")
+    {
+        Scene activeScene = SceneManager.GetActiveScene();
+        var allPlayers = Object.FindObjectsByType<PlayerStats>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < allPlayers.Length; i++)
+        {
+            var ps = allPlayers[i];
+            if (ps == null) continue;
+
+            GameObject go = ps.gameObject;
+            if (go.scene == activeScene && go.activeInHierarchy) continue;
+
+            PhotonView pv = go.GetComponent<PhotonView>();
+            bool shouldCleanup = pv == null
+                || !PhotonNetwork.IsConnected
+                || PhotonNetwork.OfflineMode
+                || pv.IsMine;
+            if (!shouldCleanup) continue;
+
+            if (enableDebugLogs)
+                Debug.Log($"{logPrefix} Removing stale local player carryover: {go.name} (scene={go.scene.name}, active={go.activeInHierarchy})");
+
+            Object.Destroy(go);
+        }
+    }
+
     public static bool TryGetBestSpawnPosition(out Vector3 spawnPosition, out Vector3 faceDirection, out string source, bool requireSpawnMarkers)
     {
         if (PlayerSpawnManager.nextSpawnPosition.HasValue)
@@ -141,15 +170,35 @@ public static class PlayerSpawnCoordinator
 
     public static GameObject FindLocalPlayer()
     {
+        Scene activeScene = SceneManager.GetActiveScene();
         var t = PlayerRegistry.GetLocalPlayerTransform();
-        if (t != null) return t.gameObject;
+        if (t != null && t.gameObject.scene == activeScene) return t.gameObject;
 
         var tagged = GameObject.FindWithTag("Player");
         if (tagged != null)
         {
+            if (tagged.scene != activeScene)
+                tagged = null;
+        }
+
+        if (tagged != null)
+        {
             var pv = tagged.GetComponent<PhotonView>();
-            if (pv == null || pv.IsMine)
-                return tagged;
+            // IMPORTANT:
+            // When we're in an online room, a scene-placed/local-instantiated Player (no PhotonView)
+            // must NOT be treated as the "local player", otherwise we will skip PhotonNetwork.Instantiate
+            // and other clients will never see this player.
+            bool requireNetworkOwnership = PhotonNetwork.IsConnected && PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode;
+            if (requireNetworkOwnership)
+            {
+                if (pv != null && pv.IsMine)
+                    return tagged;
+            }
+            else
+            {
+                if (pv == null || !PhotonNetwork.IsConnected || pv.IsMine)
+                    return tagged;
+            }
         }
 
         if (PhotonNetwork.IsConnected)
@@ -157,7 +206,7 @@ public static class PlayerSpawnCoordinator
             var allViews = Object.FindObjectsByType<PhotonView>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (var view in allViews)
             {
-                if (view != null && view.IsMine && view.CompareTag("Player"))
+                if (view != null && view.IsMine && view.CompareTag("Player") && view.gameObject.scene == activeScene)
                     return view.gameObject;
             }
 
@@ -165,6 +214,7 @@ public static class PlayerSpawnCoordinator
             foreach (var view in allViews)
             {
                 if (view == null || !view.IsMine) continue;
+                if (view.gameObject.scene != activeScene) continue;
                 if (view.GetComponent<ThirdPersonController>() != null ||
                     view.GetComponentInChildren<ThirdPersonController>(true) != null ||
                     view.GetComponent<Inventory>() != null ||
@@ -250,6 +300,10 @@ public static class PlayerSpawnCoordinator
 
         LocalInputLocker.Ensure()?.ForceGameplayCursor();
 
+        // Rebind/enable local-only HUD systems after scene transitions.
+        // Some prefab variants or transition paths can leave these unbound/disabled.
+        EnsureLocalPlayerHudBindings(player);
+
         // Ensure cached inventory from previous map is restored on the newly spawned local player.
         var inventory = player.GetComponent<Inventory>() ?? player.GetComponentInChildren<Inventory>(true);
         if (inventory != null)
@@ -267,6 +321,130 @@ public static class PlayerSpawnCoordinator
 
             equipMgr.TryRestoreCachedEquipment();
         }
+    }
+
+    private static void EnsureLocalPlayerHudBindings(GameObject player)
+    {
+        if (player == null) return;
+
+        PhotonView pv = player.GetComponent<PhotonView>();
+        bool isLocalOwner = pv == null || !PhotonNetwork.IsConnected || PhotonNetwork.OfflineMode || pv.IsMine;
+        if (!isLocalOwner) return;
+
+        // Ensure player-owned canvases/components are enabled for the local owner.
+        Canvas[] canvases = player.GetComponentsInChildren<Canvas>(true);
+        for (int i = 0; i < canvases.Length; i++)
+        {
+            if (canvases[i] != null)
+                canvases[i].enabled = true;
+        }
+
+        PlayerStats localStats = player.GetComponent<PlayerStats>() ?? player.GetComponentInChildren<PlayerStats>(true);
+        PlayerStatsUI[] statsUis = player.GetComponentsInChildren<PlayerStatsUI>(true);
+        for (int i = 0; i < statsUis.Length; i++)
+        {
+            if (statsUis[i] == null) continue;
+            statsUis[i].enabled = true;
+            if (localStats != null)
+                statsUis[i].playerStats = localStats;
+        }
+
+        // Also rebind scene-level HUDs (some maps keep HUD canvases outside the player prefab).
+        Scene activeScene = SceneManager.GetActiveScene();
+        PlayerStatsUI[] sceneStatsUis = Object.FindObjectsByType<PlayerStatsUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < sceneStatsUis.Length; i++)
+        {
+            var ui = sceneStatsUis[i];
+            if (ui == null) continue;
+            if (ui.gameObject.scene != activeScene) continue;
+            if (ui.transform.IsChildOf(player.transform)) continue;
+            if (!ui.gameObject.activeSelf) ui.gameObject.SetActive(true);
+            ui.enabled = true;
+            if (localStats != null) ui.playerStats = localStats;
+        }
+
+        InventoryUI[] inventoryUis = player.GetComponentsInChildren<InventoryUI>(true);
+        for (int i = 0; i < inventoryUis.Length; i++)
+        {
+            if (inventoryUis[i] == null) continue;
+            inventoryUis[i].enabled = true;
+            // Ensure inventory starts closed but active/ready.
+            inventoryUis[i].CloseInventory();
+        }
+
+        QuestListUI[] questListUis = player.GetComponentsInChildren<QuestListUI>(true);
+        for (int i = 0; i < questListUis.Length; i++)
+        {
+            if (questListUis[i] == null) continue;
+            questListUis[i].enabled = true;
+            if (questListUis[i].panel != null)
+                questListUis[i].panel.SetActive(false);
+        }
+
+        QuestListUI[] sceneQuestUis = Object.FindObjectsByType<QuestListUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < sceneQuestUis.Length; i++)
+        {
+            var ui = sceneQuestUis[i];
+            if (ui == null) continue;
+            if (ui.gameObject.scene != activeScene) continue;
+            if (ui.transform.IsChildOf(player.transform)) continue;
+            if (!ui.gameObject.activeSelf) ui.gameObject.SetActive(true);
+            ui.enabled = true;
+            if (ui.panel != null) ui.panel.SetActive(false);
+        }
+
+        MinimapController[] minimaps = player.GetComponentsInChildren<MinimapController>(true);
+        for (int i = 0; i < minimaps.Length; i++)
+        {
+            if (minimaps[i] != null)
+                minimaps[i].enabled = true;
+        }
+
+        MinimapController[] sceneMinimaps = Object.FindObjectsByType<MinimapController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < sceneMinimaps.Length; i++)
+        {
+            var mini = sceneMinimaps[i];
+            if (mini == null) continue;
+            if (mini.gameObject.scene != activeScene) continue;
+            if (mini.transform.IsChildOf(player.transform)) continue;
+            if (!mini.gameObject.activeSelf) mini.gameObject.SetActive(true);
+            mini.enabled = true;
+        }
+
+        PlayerInteractHUD[] interactHuds = player.GetComponentsInChildren<PlayerInteractHUD>(true);
+        for (int i = 0; i < interactHuds.Length; i++)
+        {
+            if (interactHuds[i] == null) continue;
+            interactHuds[i].enabled = true;
+            interactHuds[i].Hide();
+        }
+
+        PlayerInteractHUD[] sceneInteractHuds = Object.FindObjectsByType<PlayerInteractHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < sceneInteractHuds.Length; i++)
+        {
+            var hud = sceneInteractHuds[i];
+            if (hud == null) continue;
+            if (hud.gameObject.scene != activeScene) continue;
+            if (hud.transform.IsChildOf(player.transform)) continue;
+            if (!hud.gameObject.activeSelf) hud.gameObject.SetActive(true);
+            hud.enabled = true;
+            hud.Hide();
+        }
+
+        InventoryUI[] sceneInventoryUis = Object.FindObjectsByType<InventoryUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < sceneInventoryUis.Length; i++)
+        {
+            var invUi = sceneInventoryUis[i];
+            if (invUi == null) continue;
+            if (invUi.gameObject.scene != activeScene) continue;
+            if (invUi.transform.IsChildOf(player.transform)) continue;
+            if (!invUi.gameObject.activeSelf) invUi.gameObject.SetActive(true);
+            invUi.enabled = true;
+            invUi.CloseInventory();
+        }
+
+        // Clear stale "UI is open" ownership from previous scene/player instance.
+        LocalUIManager.Ensure()?.ForceClose();
     }
 
     private static bool TryGetSpawnMarkerPosition(out Vector3 spawnPosition)

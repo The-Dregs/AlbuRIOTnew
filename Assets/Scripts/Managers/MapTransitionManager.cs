@@ -90,6 +90,10 @@ public class MapTransitionManager : MonoBehaviourPunCallbacks
         if (string.IsNullOrEmpty(nextSceneName))
             return;
 
+        // Delegated to NetworkManager unified transition flow.
+        if (NetworkManager.BeginSceneTransition(nextSceneName))
+            return;
+
         var mgr = EnsureInstance();
         if (mgr.isTransitioning)
             return;

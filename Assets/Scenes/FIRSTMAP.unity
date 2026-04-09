@@ -541,7 +541,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &146856211
 RectTransform:
   m_ObjectHideFlags: 0
@@ -550,7 +550,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 146856210}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -779,6 +779,7 @@ GameObject:
   m_Component:
   - component: {fileID: 516160193}
   - component: {fileID: 516160194}
+  - component: {fileID: 516160195}
   m_Layer: 0
   m_Name: SPAWNMANAGER
   m_TagString: Untagged
@@ -794,7 +795,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 516160192}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -818,6 +819,28 @@ MonoBehaviour:
   playerPrefab2: {fileID: 4955065319940740038, guid: 8e9174c4f9af57e499c838d73e7f418f, type: 3}
   playerPrefab3: {fileID: 5296309203769861813, guid: 9b5d86c26ef41ae45831efe79abc7b48, type: 3}
   playerPrefab4: {fileID: 728424413547033369, guid: 2cbce45a6bd06534585386483f7266f8, type: 3}
+--- !u!114 &516160195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 516160192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonView
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 2
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &519670392
 GameObject:
   m_ObjectHideFlags: 0
@@ -2245,6 +2268,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1010461260}
   - component: {fileID: 1010461261}
+  - component: {fileID: 1010461262}
   m_Layer: 0
   m_Name: CUTSCENEMANAGER
   m_TagString: Untagged
@@ -2301,6 +2325,28 @@ MonoBehaviour:
   enableOnCutscene: []
   disableOnCutscene: []
   resetTransformsAfterCutscene: []
+--- !u!114 &1010461262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010461259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonView
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 1
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1082132524
 GameObject:
   m_ObjectHideFlags: 0
@@ -2549,7 +2595,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1209215217}
   - component: {fileID: 1209215218}
-  - component: {fileID: 1209215219}
   m_Layer: 0
   m_Name: TERRAINGENERATOR
   m_TagString: Untagged
@@ -2666,28 +2711,6 @@ MonoBehaviour:
     msApplySplat: 0
     totalMs: 0
   logTerrainMetrics: 1
---- !u!114 &1209215219
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1209215216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonView
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 18
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &1214829426
 GameObject:
   m_ObjectHideFlags: 0
@@ -4472,13 +4495,13 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1826408810}
-  - {fileID: 516160193}
-  - {fileID: 1010461260}
   - {fileID: 1738258317}
   - {fileID: 1209215217}
   - {fileID: 807325873}
   - {fileID: 810807674}
   - {fileID: 840524527}
+  - {fileID: 516160193}
+  - {fileID: 1010461260}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2065341631

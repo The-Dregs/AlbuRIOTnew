@@ -1085,39 +1085,18 @@ public class QuestManager : MonoBehaviourPun, Photon.Pun.IPunObservable, Photon.
     }
 
     /// <summary>
-    /// Invokes the MapTransitionManager.BeginTransition(sceneName) method via reflection when available.
-    /// Falls back to a direct SceneManager.LoadScene if the manager is missing.
+    /// Invokes the unified NetworkManager transition entrypoint.
+    /// Falls back to synchronized Photon load or local SceneManager load when needed.
     /// </summary>
     private void InvokeMapTransition(string sceneName)
     {
         if (string.IsNullOrEmpty(sceneName))
             return;
 
-        // Resolve MapTransitionManager across loaded assemblies (Type.GetType("MapTransitionManager") is not reliable in all Unity contexts).
-        System.Type transitionType = null;
-        var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-        for (int i = 0; i < assemblies.Length; i++)
-        {
-            var asm = assemblies[i];
-            if (asm == null) continue;
+        if (NetworkManager.BeginSceneTransition(sceneName))
+            return;
 
-            transitionType = asm.GetType("MapTransitionManager", throwOnError: false, ignoreCase: false);
-            if (transitionType != null)
-                break;
-        }
-
-        if (transitionType != null)
-        {
-            var beginMethod = transitionType.GetMethod("BeginTransition",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            if (beginMethod != null)
-            {
-                beginMethod.Invoke(null, new object[] { sceneName });
-                return;
-            }
-        }
-
-        Debug.LogWarning($"[QuestManager] MapTransitionManager.BeginTransition not found for '{sceneName}'. Using synchronized scene load fallback.");
+        Debug.LogWarning($"[QuestManager] NetworkManager.BeginSceneTransition unavailable for '{sceneName}'. Using synchronized scene load fallback.");
 
         if (PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && !PhotonNetwork.InRoom)
         {

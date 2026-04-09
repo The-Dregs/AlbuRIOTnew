@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// static registry of all active PlayerStats instances.
@@ -144,7 +145,13 @@ public static class PlayerRegistry
         var pv = playerTransform.GetComponent<PhotonView>();
         bool requireNetworkOwnership = PhotonNetwork.IsConnected && PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode;
         if (requireNetworkOwnership)
-            return pv != null && pv.IsMine;
+        {
+            if (pv == null || !pv.IsMine)
+                return false;
+
+            // In network rooms, never resolve a carried-over DontDestroyOnLoad player as "local".
+            return playerTransform.gameObject.scene == SceneManager.GetActiveScene();
+        }
 
         return pv == null || pv.IsMine;
     }
