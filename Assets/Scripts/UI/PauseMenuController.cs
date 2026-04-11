@@ -5,6 +5,11 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Photon.Pun;
 
+/// <summary>
+/// Escape / pause menu (and dev sub-panel) on the local player prefab.
+/// Scene-change buttons should go through <see cref="LoadGameplaySceneFromEscapePanel"/> so spawn, HUD, and input init match gameplay transitions.
+/// Note: class name is <c>PauseMenuControllers</c> (filename is PauseMenuController.cs) — keep Unity references in sync if you rename.
+/// </summary>
 public class PauseMenuControllers : MonoBehaviour
 {
     [Header("UI Panel")]
@@ -236,34 +241,21 @@ public class PauseMenuControllers : MonoBehaviour
         // guard against old pause scripts that may have set timescale
         Time.timeScale = 1f;
 
-        // load via photon in room; otherwise local scene load fallback
-        if (PhotonNetwork.IsConnected)
-            PhotonNetwork.LoadLevel(mainMenuSceneName);
-        else
-            SceneManager.LoadScene(mainMenuSceneName);
+        // IMPORTANT: never use PhotonNetwork.LoadLevel for "Leave Game".
+        // With AutomaticallySyncScene enabled, host would pull everyone back to menu.
+        // We want local exit only, so leave/disconnect locally and then load menu locally.
+        NetworkManager.ForceDisconnectAndCleanup("[PauseMenuController] OnLeaveGameButton");
+        SceneManager.LoadScene(mainMenuSceneName);
     }
 
     public void OnLoadTestingButton()
     {
-        // transition to gameplay scene; release UI and locks, let gameplay re-lock cursor on spawn
-        if (_inputLockToken != 0)
-        {
-            LocalInputLocker.Ensure().Release(_inputLockToken);
-            _inputLockToken = 0;
-        }
-        if (LocalUIManager.Instance != null) LocalUIManager.Instance.ForceClose();
-        Photon.Pun.PhotonNetwork.LoadLevel(testingSceneName);
+        LoadGameplaySceneFromEscapePanel(testingSceneName);
     }
 
     public void OnLoadFirstMapButton()
     {
-        if (_inputLockToken != 0)
-        {
-            LocalInputLocker.Ensure().Release(_inputLockToken);
-            _inputLockToken = 0;
-        }
-        if (LocalUIManager.Instance != null) LocalUIManager.Instance.ForceClose();
-        Photon.Pun.PhotonNetwork.LoadLevel(firstMapSceneName);
+        LoadGameplaySceneFromEscapePanel(firstMapSceneName);
     }
 
     public void OnLoadBakunawaBossFightButton()
@@ -281,25 +273,93 @@ public class PauseMenuControllers : MonoBehaviour
             return;
         }
 
-        if (_inputLockToken != 0)
+        PrepareEscapePanelBeforeSceneChange();
+
+        if (inNetworkRoom)
         {
-            LocalInputLocker.Ensure().Release(_inputLockToken);
-            _inputLockToken = 0;
+            if (!NetworkManager.BeginSceneTransition(bakunawaBossFightSceneName))
+                MapTransitionManager.BeginTransition(bakunawaBossFightSceneName);
         }
-
-        if (LocalUIManager.Instance != null)
-            LocalUIManager.Instance.ForceClose();
-
-        MapTransitionManager.BeginTransition(bakunawaBossFightSceneName);
+        else if (NetworkManager.Instance != null)
+            NetworkManager.Instance.BeginLocalDevSceneLoad(bakunawaBossFightSceneName);
+        else
+            MapTransitionManager.BeginTransition(bakunawaBossFightSceneName);
     }
 
     // New methods for scene loading
     public void GoToMainMenu() { SceneManager.LoadScene(mainMenuSceneName); }
-    public void GoToTestingScene() { SceneManager.LoadScene(testingSceneName); }
-    public void GoToFirstMap() { SceneManager.LoadScene(firstMapSceneName); }
-    public void GoToSecondMap() { SceneManager.LoadScene(secondMapSceneName); }
-    public void GoToThirdMap() { SceneManager.LoadScene(thirdMapSceneName); }
-    public void GoToFourthMap() { SceneManager.LoadScene(fourthMapSceneName); }
+    public void GoToTestingScene() { LoadGameplaySceneFromEscapePanel(testingSceneName); }
+    public void GoToFirstMap() { LoadGameplaySceneFromEscapePanel(firstMapSceneName); }
+    public void GoToSecondMap() { LoadGameplaySceneFromEscapePanel(secondMapSceneName); }
+    public void GoToThirdMap() { LoadGameplaySceneFromEscapePanel(thirdMapSceneName); }
+    public void GoToFourthMap() { LoadGameplaySceneFromEscapePanel(fourthMapSceneName); }
+
+    /// <summary>
+    /// Escape / dev panel: use the same transition + spawn init as gameplay so local player, HUD, and input are correct.
+    /// Online room: host only, uses <see cref="NetworkManager.BeginSceneTransition"/>.
+    /// Not in a room: local load + spawn coordinator on <see cref="NetworkManager"/>.
+    /// </summary>
+    private void LoadGameplaySceneFromEscapePanel(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            Debug.LogWarning("[PauseMenuController] Scene name is empty.");
+            return;
+        }
+
+        PrepareEscapePanelBeforeSceneChange();
+
+        bool inRoom = PhotonNetwork.InRoom;
+        bool onlineMultiplayer = PhotonNetwork.IsConnected && !PhotonNetwork.OfflineMode && inRoom;
+
+        if (inRoom)
+        {
+            if (onlineMultiplayer && !PhotonNetwork.IsMasterClient)
+            {
+                Debug.LogWarning("[PauseMenuController] Only the host can load a scene for everyone. Joiners stay in the current scene.");
+                return;
+            }
+
+            if (!NetworkManager.BeginSceneTransition(sceneName))
+                Debug.LogError($"[PauseMenuController] BeginSceneTransition failed for '{sceneName}'.");
+            return;
+        }
+
+        if (NetworkManager.Instance != null)
+            NetworkManager.Instance.BeginLocalDevSceneLoad(sceneName);
+        else
+            SceneManager.LoadScene(sceneName);
+    }
+
+    private void PrepareEscapePanelBeforeSceneChange()
+    {
+        isOpen = false;
+        if (pausePanel != null) pausePanel.SetActive(false);
+        if (optionsPanel != null) optionsPanel.SetActive(false);
+        if (devPanel != null) devPanel.SetActive(false);
+
+        if (LocalUIManager.Instance != null)
+            LocalUIManager.Instance.ForceClose();
+
+        var locker = LocalInputLocker.Ensure();
+        if (locker != null)
+        {
+            if (_inputLockToken != 0)
+            {
+                locker.Release(_inputLockToken);
+                _inputLockToken = 0;
+            }
+            locker.ReleaseAllForOwner("PauseMenu");
+            locker.ReleaseAllForOwner("DevPanel");
+            locker.ReleaseAllForOwner("Inventory");
+            locker.ReleaseAllForOwner("QuestList");
+            locker.ReleaseAllForOwner("CutsceneManager");
+            locker.ReleaseAllForOwner("MinimapFullMap");
+            locker.ForceGameplayCursor();
+        }
+
+        Time.timeScale = 1f;
+    }
 
     // Example: Show/hide pause panel
     public void ShowPausePanel(bool show)
@@ -633,13 +693,14 @@ public class PauseMenuControllers : MonoBehaviour
     /// </summary>
     public void OnToggleGodModeButton()
     {
-        GameObject player = GameObject.FindWithTag("Player");
-        if (player == null)
+        Transform localPlayerTransform = PlayerRegistry.GetLocalPlayerTransform();
+        if (localPlayerTransform == null)
         {
-            Debug.LogWarning("[PauseMenuController] Player not found! Cannot toggle god mode.");
+            Debug.LogWarning("[PauseMenuController] Local player not found! Cannot toggle god mode.");
             return;
         }
-        
+
+        GameObject player = localPlayerTransform.gameObject;
         PhotonView pv = player.GetComponent<PhotonView>();
         if (pv != null && !pv.IsMine)
         {
@@ -655,6 +716,10 @@ public class PauseMenuControllers : MonoBehaviour
         }
         
         stats.godMode = !stats.godMode;
+        if (stats.godMode)
+        {
+            stats.currentStamina = stats.maxStamina;
+        }
         string status = stats.godMode ? "ENABLED" : "DISABLED";
         Debug.Log($"[PauseMenuController] God mode {status}");
     }

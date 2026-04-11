@@ -44,13 +44,11 @@ public class UnderwaterEffect : MonoBehaviour
 	public float overlayFadeOutPerSecond = 2f;
 
 	private bool _cachedDefaults = false;
-	private bool _defaultFogEnabled;
-	private Color _defaultFogColor;
-	private float _defaultFogDensity;
 	private Color _defaultBackgroundColor;
 	private Camera _cam;
 	private float _overlayCurrentAlpha = 0f;
 	private PhotonView _parentPhotonView;
+	private bool _wasUnderwaterLastFrame;
 
 	void Start()
 	{
@@ -64,10 +62,6 @@ public class UnderwaterEffect : MonoBehaviour
 	void CacheDefaults()
 	{
 		if (_cachedDefaults) return;
-
-		_defaultFogEnabled = RenderSettings.fog;
-		_defaultFogColor = RenderSettings.fogColor;
-		_defaultFogDensity = RenderSettings.fogDensity;
 
 		if (_cam != null)
 		{
@@ -178,18 +172,14 @@ public class UnderwaterEffect : MonoBehaviour
 
 	void OnDisable()
 	{
-		// Restore defaults if this effect is disabled at runtime
-		if (_cachedDefaults)
-		{
-			RenderSettings.fog = _defaultFogEnabled;
-			RenderSettings.fogColor = _defaultFogColor;
-			RenderSettings.fogDensity = _defaultFogDensity;
+		// Keep camera-local visuals clean.
+		if (_cam != null)
+			_cam.backgroundColor = _defaultBackgroundColor;
 
-			if (_cam != null)
-			{
-				_cam.backgroundColor = _defaultBackgroundColor;
-			}
-		}
+		// Hand global fog control back to day/night manager if we were underwater.
+		if (_wasUnderwaterLastFrame && DayNightCycleManager.Instance != null)
+			DayNightCycleManager.Instance.ForceApplyEnvironmentNow();
+		_wasUnderwaterLastFrame = false;
 
 		// Reset overlay to transparent when this effect is disabled
 		SetOverlayAlpha(0f);
@@ -221,6 +211,7 @@ public class UnderwaterEffect : MonoBehaviour
 
 		if (isUnderwater)
 		{
+			_wasUnderwaterLastFrame = true;
 			RenderSettings.fog = true;
 			RenderSettings.fogColor = underwaterFogColor;
 			RenderSettings.fogDensity = underwaterFogDensity;
@@ -237,9 +228,13 @@ public class UnderwaterEffect : MonoBehaviour
 		}
 		else
 		{
-			RenderSettings.fog = _defaultFogEnabled;
-			RenderSettings.fogColor = _defaultFogColor;
-			RenderSettings.fogDensity = _defaultFogDensity;
+			if (_wasUnderwaterLastFrame)
+			{
+				// Let day/night instantly restore the correct network-driven fog profile.
+				if (DayNightCycleManager.Instance != null)
+					DayNightCycleManager.Instance.ForceApplyEnvironmentNow();
+				_wasUnderwaterLastFrame = false;
+			}
 
 			if (tintCameraBackground && _cam != null)
 			{

@@ -55,8 +55,8 @@ public class MinimapController : MonoBehaviour
     public bool rotateCameraWithLocalPlayer = false;
     [Tooltip("If enabled, opening the fullscreen map (M) frames the whole map.")]
     public bool fullMapShowsWholeMap = true;
-    [Tooltip("Fixed Y height for fullscreen map camera when framing the map.")]
-    public float fullMapCameraFixedHeight = 80f;
+    [Tooltip("Fixed Y height for fullscreen map camera when framing the map. Keep low to avoid heavy distance fog washout.")]
+    public float fullMapCameraFixedHeight = 12f;
     [Min(0f)] public float wholeMapPaddingWorld = 24f;
     [Tooltip("If enabled, the fullscreen map uses a dedicated runtime camera cloned from the assigned camera so it cannot be moved by the player camera rig.")]
     public bool useDedicatedRuntimeFullMapCamera = true;
@@ -131,8 +131,6 @@ public class MinimapController : MonoBehaviour
     public bool fogAffectsOnlyIcons = true;
     [Tooltip("If enabled, fullscreen map still draws a translucent fog layer while icons are additionally gated by reveal.")]
     public bool showFogVisualOnFullMap = true;
-    [Tooltip("If enabled, scene fog is temporarily disabled while full map is open to avoid night manager fog whitening the map camera.")]
-    public bool disableSceneFogWhileFullMapOpen = true;
     public Color fullMapFogTint = new Color(0f, 0f, 0f, 0.55f);
     [Tooltip("If enabled, reveal uses all active players' positions so exploration is shared in multiplayer.")]
     public bool shareFogRevealAcrossPlayers = true;
@@ -188,8 +186,6 @@ public class MinimapController : MonoBehaviour
 
     private Sprite runtimeFallbackPlayerSprite;
     private Sprite runtimeFallbackWorldSprite;
-    private bool fogStateCaptured;
-    private bool fogStateBeforeFullMap;
     private RenderTexture runtimeFullMapTexture;
     private Camera runtimeFullMapCamera;
     private Camera fullMapCameraTemplate;
@@ -397,16 +393,6 @@ public class MinimapController : MonoBehaviour
             autoSceneRefreshTimer = 0f;
         }
 
-        if (disableSceneFogWhileFullMapOpen)
-        {
-            if (!fogStateCaptured)
-            {
-                fogStateBeforeFullMap = RenderSettings.fog;
-                fogStateCaptured = true;
-            }
-            RenderSettings.fog = false;
-        }
-
         ApplyFullMapCameraRenderSettings();
         RefreshFullMapImageSource();
 
@@ -439,12 +425,6 @@ public class MinimapController : MonoBehaviour
 
         if (isFullMapOpen)
             LocalInputLocker.Ensure()?.ForceGameplayCursor();
-
-        if (disableSceneFogWhileFullMapOpen && fogStateCaptured)
-        {
-            RenderSettings.fog = fogStateBeforeFullMap;
-            fogStateCaptured = false;
-        }
 
         isFullMapOpen = false;
         fullMapViewInitialized = false;
@@ -555,10 +535,6 @@ public class MinimapController : MonoBehaviour
             return;
         if (fullMapCamera == null)
             return;
-
-        // some managers may re-enable fog each frame; enforce off while full map is open
-        if (disableSceneFogWhileFullMapOpen)
-            RenderSettings.fog = false;
 
         // keep camera render constraints active in case external systems modify them at runtime
         ApplyFullMapCameraRenderSettings();
@@ -688,7 +664,21 @@ public class MinimapController : MonoBehaviour
         float orthographicHalfHeight = Mathf.Max(halfZ, orthographicHalfHeightForX);
         targetCamera.orthographicSize = Mathf.Max(1f, orthographicHalfHeight);
 
-        float y = fullMapCameraFixedHeight;
+        float groundY = worldBounds.center.y;
+        Terrain active = Terrain.activeTerrain;
+        if (active != null && active.terrainData != null)
+        {
+            Vector3 samplePos = new Vector3(center.x, 0f, center.z);
+            groundY = active.SampleHeight(samplePos) + active.transform.position.y;
+        }
+        else
+        {
+            groundY = worldBounds.min.y;
+        }
+
+        // Keep map camera close to the ground plane so scene fog doesn't wash out the full map.
+        float heightAboveGround = Mathf.Clamp(fullMapCameraFixedHeight, 2f, 30f);
+        float y = groundY + heightAboveGround;
         targetCamera.transform.position = new Vector3(center.x, y, center.z);
         targetCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
     }

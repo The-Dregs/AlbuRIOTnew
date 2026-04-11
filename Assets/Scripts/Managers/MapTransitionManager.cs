@@ -61,6 +61,12 @@ public class MapTransitionManager : MonoBehaviourPunCallbacks
 
     void Awake()
     {
+        // This type only needs PunCallbacks (no RPCs). A PhotonView on a DontDestroyOnLoad manager
+        // keeps a fixed ViewID and collides with scene/prefab objects in the next scene (duplicate ViewID errors).
+        var pv = GetComponent<PhotonView>();
+        if (pv != null)
+            Destroy(pv);
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);

@@ -4973,7 +4973,7 @@ MonoBehaviour:
   nightNotificationGroup: {fileID: 89509989}
   nightNotificationText: {fileID: 0}
   nightNotificationFadeInDuration: 0.25
-  nightNotificationHoldDuration: 2
+  nightNotificationHoldDuration: 0.5
   nightNotificationFadeOutDuration: 0.25
   nightOverlayGroup: {fileID: 89509989}
   nightOverlayMaxAlpha: 0.7

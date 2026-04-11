@@ -21,7 +21,7 @@ public class InventorySlot
 public class Inventory : MonoBehaviourPun, IPunObservable
 {
     [Header("Inventory Configuration")]
-    public const int SLOT_COUNT = 12;
+    public const int SLOT_COUNT = 20;
     [SerializeField] private InventorySlot[] slots = new InventorySlot[SLOT_COUNT];
     
     [Header("Events")]
@@ -107,7 +107,11 @@ public class Inventory : MonoBehaviourPun, IPunObservable
         for (int i = 0; i < limit; i++)
         {
             var s = slots[i];
-            if (s != null && s.item == item && s.quantity < item.maxStack) return i;
+            if (s == null || s.item != item) continue;
+            // Equipment/armor: one per slot — never treat as merge target by stack size.
+            if (item.IsEquipment)
+                return i;
+            if (s.quantity < item.maxStack) return i;
         }
         return -1;
     }
@@ -132,6 +136,8 @@ public class Inventory : MonoBehaviourPun, IPunObservable
                 StartCoroutine(Co_TryRestoreFromCache());
             }
         }
+
+        SanitizeEquipmentStacks();
     }
 
     private System.Collections.IEnumerator Co_TryRestoreFromCache()
@@ -191,6 +197,25 @@ public class Inventory : MonoBehaviourPun, IPunObservable
                 for (int i = 0; i < copy; i++) slots[i] = old[i];
             }
         }
+    }
+
+    /// <summary>Splits legacy stacked equipment into one item per slot (local owner only).</summary>
+    private void SanitizeEquipmentStacks()
+    {
+        if (!IsLocalPlayerOwnedInventory()) return;
+        EnsureSize();
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var s = slots[i];
+            if (s == null || s.item == null || !s.item.IsEquipment) continue;
+            if (s.quantity <= 1) continue;
+
+            int extra = s.quantity - 1;
+            s.quantity = 1;
+            OnSlotChanged?.Invoke(i);
+            AddItemLocal(s.item, extra, silent: true);
+        }
+        // AddItemLocal already raises OnInventoryChanged when it succeeds.
     }
 
     /// <summary>
@@ -276,12 +301,13 @@ public class Inventory : MonoBehaviourPun, IPunObservable
         EnsureSize();
 
         int remainingQuantity = quantity;
-        bool isStackable = item.maxStack > 1;
-        bool isUnique = item.uniqueInstance || item.itemType == ItemType.Unique;
+        bool isStackable = !item.IsEquipment && item.maxStack > 1;
+        // Same as Unique: equipment/armor must occupy its own slot (quantity 1); never merge into one stack.
+        bool needsOwnSlotPerUnit = item.uniqueInstance || item.itemType == ItemType.Unique || item.IsEquipment;
 
-        if (isUnique)
+        if (needsOwnSlotPerUnit)
         {
-            // Unique: always insert individual instances into empty slots
+            // Unique / equipment: one instance per empty slot
             for (int addCount = 0; addCount < quantity; addCount++)
             {
                 bool placed = false;
@@ -413,14 +439,14 @@ public class Inventory : MonoBehaviourPun, IPunObservable
         EnsureSize();
 
         int remainingQuantity = quantity;
-        bool isStackable = item.maxStack > 1;
-        bool isUnique = item.uniqueInstance || item.itemType == ItemType.Unique;
+        bool isStackable = !item.IsEquipment && item.maxStack > 1;
+        bool needsOwnSlotPerUnit = item.uniqueInstance || item.itemType == ItemType.Unique || item.IsEquipment;
         
-        Debug.Log($"[Inventory] AddItemLocal - Item: {item.itemName}, Quantity: {quantity}, Stackable: {isStackable}, Unique: {isUnique}");
+        Debug.Log($"[Inventory] AddItemLocal - Item: {item.itemName}, Quantity: {quantity}, Stackable: {isStackable}, OwnSlotPerUnit: {needsOwnSlotPerUnit}");
 
-        if (isUnique)
+        if (needsOwnSlotPerUnit)
         {
-            // Unique: always insert individual instances into empty slots
+            // Unique / equipment: one instance per empty slot
             for (int addCount = 0; addCount < quantity; addCount++)
             {
                 bool placed = false;

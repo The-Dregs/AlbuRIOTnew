@@ -36,8 +36,10 @@ MonoBehaviour:
   useSound: {fileID: 0}
   pickupEffect: {fileID: 0}
   useEffect: {fileID: 0}
-  modelPrefab: {fileID: 919132149155446097, guid: a0cebddf8ba45bd42800ad2b258d96ab, type: 3}
-  overrideTransform: 0
-  modelLocalPosition: {x: 0, y: 0, z: 0}
-  modelLocalEulerAngles: {x: 0, y: 0, z: 0}
-  modelScale: {x: 1, y: 1, z: 1}
+  modelPrefab: {fileID: 919132149155446097, guid: 7556b907ab4f6ac46ac3d01f9f7c441f, type: 3}
+  overrideTransform: 1
+  modelLocalPosition: {x: 0.109, y: 0.059, z: 0.016}
+  modelLocalEulerAngles: {x: -0.000008001037, y: 266.87067, z: -0.000009633121}
+  modelScale: {x: 50, y: 50, z: 50}
+  modelGripQuaternionAuthoritative: 1
+  modelLocalGripQuaternion: {x: 0.000000013038508, y: -0.7261508, z: -0.000000108499016, w: 0.6875355}

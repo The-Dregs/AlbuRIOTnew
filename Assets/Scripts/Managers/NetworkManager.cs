@@ -668,6 +668,80 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         transitionTargetScene = string.Empty;
     }
 
+    /// <summary>
+    /// Offline / not-in-room scene load from dev or pause escape panel.
+    /// Runs spawn coordination and input/HUD restore so the local player initializes correctly.
+    /// Do not use while in an online Photon room — use <see cref="BeginSceneTransition"/> instead.
+    /// </summary>
+    public void BeginLocalDevSceneLoad(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+            return;
+
+        if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode)
+        {
+            Debug.LogWarning("[NetworkManager] BeginLocalDevSceneLoad ignored while in an online room. Use BeginSceneTransition from the host instead.");
+            return;
+        }
+
+        StartCoroutine(Co_LocalDevSceneLoadFromPauseMenu(sceneName));
+    }
+
+    private IEnumerator Co_LocalDevSceneLoadFromPauseMenu(string sceneName)
+    {
+        PlayerSpawnManager.hasTeleportedByLoader = false;
+        CutsceneManager.SetTransitionControlledStart(false);
+
+        Inventory.CacheLocalInventory();
+        EquipmentManager.CacheLocalEquipment();
+
+        SceneManager.LoadScene(sceneName);
+
+        float elapsed = 0f;
+        const float loadTimeout = 60f;
+        while (SceneManager.GetActiveScene().name != sceneName && elapsed < loadTimeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (SceneManager.GetActiveScene().name != sceneName)
+        {
+            Debug.LogError($"[NetworkManager] Dev local load timed out waiting for scene '{sceneName}'.");
+            yield break;
+        }
+
+        yield return null;
+        yield return null;
+
+        PlayerSpawnCoordinator.CleanupStaleLocalPlayersOutsideActiveScene(
+            enableDebugLogs: true,
+            logPrefix: "[NetworkManager][DevLocalLoad]");
+
+        CutsceneManager startCutscene = FindStartSceneCutsceneManager();
+        if (startCutscene != null)
+        {
+            float maxWait = 120f;
+            float t = 0f;
+            while (startCutscene != null && !startCutscene.IsStartSequenceComplete && t < maxWait)
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
+        }
+        else
+        {
+            yield return PlayerSpawnCoordinator.EnsureLocalPlayerAtSpawn(
+                maxWaitSeconds: 25f,
+                waitForSpawnMarkers: true,
+                enableDebugLogs: true,
+                logPrefix: "[NetworkManager][DevLocalLoad]");
+        }
+
+        yield return null;
+        RestoreLocalGameplayAfterTransition();
+    }
+
     private void RestoreLocalGameplayAfterTransition()
     {
         var locker = LocalInputLocker.Ensure();
@@ -677,6 +751,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
             locker.ReleaseAllForOwner("QuestCutscene");
             locker.ReleaseAllForOwner("AreaCutscene");
             locker.ReleaseAllForOwner("PostQuestSceneTransition");
+            locker.ReleaseAllForOwner("CutsceneManager");
             locker.ReleaseAllForOwner("PauseMenu");
             locker.ReleaseAllForOwner("NPCDialogue");
             locker.ReleaseAllForOwner("NunoShop");

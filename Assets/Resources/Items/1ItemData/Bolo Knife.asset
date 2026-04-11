@@ -19,7 +19,7 @@ MonoBehaviour:
   maxStack: 1
   healthModifier: 0
   staminaModifier: 0
-  damageModifier: 20
+  damageModifier: 15
   speedModifier: 0
   staminaCostModifier: 0
   healAmount: 0

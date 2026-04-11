@@ -2,248 +2,30 @@
 description: Project Rules
 alwaysApply: false
 ---
-title: AlbuRIOT (Unity/Photon)
+title: AlbuRIOT (Unity/Photon) — Pointer Rules
 
-# Scope
-- Do NOT edit: `Assets/Photon/`, `Assets/TextMesh Pro/`, `Assets/Imported Assets/`, `Library/`, `Temp/`, `Packages/`, `*.meta`, `obj/`, `bin/`.
-- New code under `Assets/Scripts/` (Player, Enemies, Managers, UI, Combat, NPC, Map, Inventory, etc.).
-- After code changes: output a short "Unity setup" checklist if inspector/prefab work is needed.
+# Canonical Instructions
+- Primary project guidance lives in `CLAUDE.md` at repository root.
+- Use this rules file as a compact enforcement layer and quick pointer.
 
-# Project Overview
-AlbuRIOT is a multiplayer survival game (up to 4 players) inspired by Philippine mythology.
-Primary systems:
-- procedural map generation (`Assets/Scripts/Map/TerrainGenerator.cs`, `MapResourcesGenerator.cs`)
-- enemy ai and combat (`Assets/Scripts/Enemies/BaseEnemyAI.cs`, per-creature AI under `Assets/Enemies/`)
-- power-steal progression (`Assets/Scripts/Combat/PowerStealManager.cs`)
-- ability system (`Assets/Scripts/Combat/Abilities/AbilityBase.cs`)
-- moveset/combat style system (`Assets/Scripts/Managers/MovesetManager.cs`)
-- inventory and equipment (`Assets/Scripts/Inventory/`, `Assets/Scripts/Equipments/`)
-- quest/objective system (`Assets/Scripts/Managers/QuestManager.cs`, `Assets/Scripts/Items/QuestData.cs`)
-- encyclopedia/bestiary system (`Assets/Scripts/Encyclopedia/`)
-- shrine offering system (`Assets/Scripts/Managers/ShrineManager.cs`)
-- tutorial system (`Assets/Scripts/Managers/TutorialManager.cs`)
-- co-op multiplayer via Photon PUN 2
+# Always Enforce
+- Do NOT edit generated/vendor paths unless explicitly requested: `Library/`, `Temp/`, `obj/`, `bin/`, `Packages/`, `Assets/Photon/`, `Assets/TextMesh Pro/`, `Assets/Imported Assets/`, `*.meta`.
+- Keep gameplay changes multiplayer-safe for Photon PUN 2.
+- Ownership/authority rules:
+  - only owners mutate owned state (`photonView.IsMine`)
+  - shared authority stays on `PhotonNetwork.IsMasterClient` (or offline)
+- For players, never use `FindWithTag("Player")`; use `PlayerRegistry.All` and `PlayerRegistry.GetLocalPlayerTransform()`.
+- Keep spawn/transition logic centralized through `PlayerSpawnCoordinator`.
+- Keep edits minimal and localized; avoid large formatting/rename churn.
 
-# Folder Structure
-```
-Assets/Scripts/
-  Camera/       - CameraShake
-  Combat/       - PlayerCombat, DamageRelay, EnemyDamageRelay, StatusEffectRelay,
-                  PowerStealManager, DebuffManager, PlayerDamageOnTrigger, AttackCooldownUI
-  Combat/Abilities/ - AbilityBase (abstract SO), TikbalangStompAbility
-  Data/         - DataTableManager
-  Editor/       - AnimatorValidator, CharacterControllerGizmoDrawer, PlayerAnimatorSetup,
-                  PreBuildChecks
-  Encyclopedia/ - EncyclopediaEntry, EncyclopediaManager, EncyclopediaUI,
-                  EnemyEncounterDetector, FirstEncounterDialogueUI
-  Enemies/      - BaseEnemyAI (abstract), EnemyData, EnemyFactory, EnemyHealthBar,
-                  EnemyDebugOverhead, IEnemyDamageable, NightHuntModifier, BehaviorTree/
-  Equipments/   - EquipmentManager, EquipmentPickup, EquipmentGripPreview
-  Inventory/    - Inventory, InventoryUI, ItemSlotUI
-  Items/        - ItemData, ItemDatabase, ItemManager, ItemPickup, QuestData, DestructiblePlant,
-                  DebuffData, MovesetData, ShrineData, SpecialMoveData, TutorialData
-  Managers/     - QuestManager, GameManager, CutsceneManager, SceneLoader, NetworkManager,
-                  PlayerSpawnCoordinator, PlayerRegistry, PlayerSpawnManager, SpawnManager
-                  (TutorialSpawnManager), MapTransitionManager, ProceduralMapLoader,
-                  DayNightCycleManager, EnemyManager, DialogueManager, ChapterGameplayLoop,
-                  AlbuRIOTIntegrationManager, EnemyCampEncounter, GlobalAudioVolumeSettings,
-                  GlobalPlaymodeCleanup, LoadingScreenManager, LobbyManager,
-                  MemoryCleanupManager, MovesetManager, MultiplayerScalingManager,
-                  NunoManager, PrologueManager, QuestAreaTrigger, QuestJsonLoader,
-                  SceneSpawnHandler, SceneTransitionTrigger, ShopTradeJsonLoader,
-                  ShrineManager, StoryManager, TutorialManager, TutorialTrigger,
-                  PhotonEditorBootstrap, FreelookCameraToggle, FreestyleCameraController
-  Map/          - TerrainGenerator, MapResourcesGenerator, GeneratedDecorCullingManager,
-                  TerrainEvaluationRunner, TerrainMetricsReporter, UnderwaterEffect,
-                  WaterHearingZone
-  NPC/          - NPCDialogueTrigger, NPCDialogueManager, NPCDialogueData,
-                  DialogueAreaTrigger, NunoMerchantTrigger, NunoShopManager,
-                  NunoTradeSlotUI, ShopTradeData
-  Player/       - ThirdPersonController, ThirdPersonCameraOrbit, PlayerStats, PlayerCombat,
-                  PlayerPickupInteractor, PlayerSkillSlots, PlayerResurrection,
-                  PlayerAnimatorSync, PlayerAudioManager, PlayerNameDisplay,
-                  PlayerQuestArrow, PlayerQuestRelay, PlayerStatsUI, PlayerUIController,
-                  PlayerInteractHUD, PlayerAreaPresenceUI, LocalPlayerHearingController
-  UI/           - LocalInputLocker, LocalUIManager, QuestHUD, QuestListUI, ScreenFader,
-                  PauseMenuController, DamageOverlayUI, DownedOverlayUI, BossHealthBarUI,
-                  ComboCounterUI, DamageText, DayNightTimerUI, DialogueData,
-                  FirstMapLoadingScreen, ItemPickupNotification, NunoDialogueBarUI,
-                  ObjectiveArrow, ProloguePauseMenu, SkillUsageUI, Billboard
-  VFX/          - VFXManager (class name: EffectsManager)
-Assets/Enemies/ - per-creature folders with AI scripts, plus shared utilities in 1COMMON/,
-                  stat data in 2STATS/, animation assets in 3ANIMATIONS/
-Assets/Enemies/1COMMON/ - BeamMover, DestroyAfterSeconds, EnemyDamageZone, EnemyProjectile
-Assets/docs/    - chapter breakdowns, design docs, setup guides, memory optimization guide
-```
+# Unity-Specific Working Rules
+- New gameplay code belongs under `Assets/Scripts/`.
+- Do not create editor tooling unless explicitly requested.
+- If scene/inspector wiring is required, provide a short Unity setup checklist.
 
-# Key Singletons (DontDestroyOnLoad)
-- `QuestManager.Instance` — quest state, objective tracking, multiplayer sync
-- `GameManager.Instance` — game state, scene management
-- `SceneLoader.Instance` — async scene loading with loading screens
-- `ItemManager.Instance` — runtime item database
-- `NetworkManager.Instance` — Photon connection/room management
-- `LocalUIManager.Instance` — exclusive UI panel management
-- `EncyclopediaManager.Instance` — enemy discovery/bestiary tracking, persistent via PlayerPrefs
-- `AlbuRIOTIntegrationManager.Instance` — cross-system wiring, auto-connects core managers
-- `MemoryCleanupManager.Instance` — centralized memory cleanup on scene change/room leave
-- `MultiplayerScalingManager.Instance` — scales enemy stats/spawns by player count
-- `NunoManager.Instance` — tutorial NPC guidance, skill HUD gating
-- `LoadingScreenManager` — async scene loading with animated loading panel
-- `GlobalPlaymodeCleanup` — clean Photon disconnect on quit, static `IsQuitting` flag
-- `NunoDialogueBarUI.Instance` — bottom-screen dialogue bar for Nuno NPC
-
-Scene-scoped (no DontDestroyOnLoad):
-- `LocalInputLocker` — per-scene input lock stack
-- `CutsceneManager` — per-scene cutscene playback
-- `DialogueManager` — per-scene dialogue
-- `FirstMapLoadingScreen` — first-map-specific loading screen (singleton, scene-scoped)
-
-# Style (C#)
-- `[SerializeField] private` for inspector; PascalCase for classes/methods, camelCase for fields.
-- No static mutable shared state; use instance/scoped data for multiplayer.
-- keep comments lowercase and concise
-
-# Core Coding Rules
-- read the full target script before modifying it
-- apply fixes directly and iterate until stable
-- keep all systems multiplayer-safe and scalable
-- provide step-by-step Unity inspector/setup notes whenever assignments are required
-- keep code/file organization clear and structured
-
-# Photon (critical)
-- All gameplay actions MUST use `[PunRPC]` and `photonView.RPC()`. Only `photonView.IsMine` owners mutate state; others read-only.
-- Spawn/destroy: `PhotonNetwork.Instantiate()` / `PhotonNetwork.Destroy()` when in room.
-- AI ticks only on `PhotonNetwork.IsMasterClient` (or offline).
-- only move/control local-owned players (`PhotonView.IsMine`)
-- keep master client authoritative for shared quest state and synchronized transitions
-- avoid duplicate spawns by checking for existing local player first
-- use RPC buffering carefully to avoid stale state across scene changes
-- when iterating players, always use `PlayerRegistry.All` — never `FindWithTag("Player")`
-
-# Centralized Spawn And Transition Flow
-Use a single spawn pipeline for all maps.
-
-Single source of truth:
-- `Assets/Scripts/Managers/PlayerSpawnCoordinator.cs` (static utility class)
-
-Callers that must use the coordinator:
-- `Assets/Scripts/Managers/MapTransitionManager.cs`
-- `Assets/Scripts/Managers/ProceduralMapLoader.cs`
-- `Assets/Scripts/Managers/CutsceneManager.cs` (WaitForPlayerAndSetup)
-
-Rules:
-- do not create map-specific spawn handlers
-- do not duplicate spawn selection/teleport logic in other scripts
-- all scene-entry player placement must go through `EnsureLocalPlayerAtSpawn(...)`
-- generated scene markers must use `SpawnMarker_#` naming
-- map-generated marker flow should come from `MapResourcesGenerator`
-
-Spawn fallback order:
-1. `PlayerSpawnManager.nextSpawnPosition`
-2. `SpawnMarker_*` objects in active scene
-3. `MapResourcesGenerator.GetSharedSpawnPositions()`
-4. `TutorialSpawnManager.spawnPoints`
-5. `NetworkManager.spawnPoints`
-6. terrain center fallback
-
-# Player Spawning
-- 4 player prefabs: `playerPrefab`, `playerPrefab2`, `playerPrefab3`, `playerPrefab4`
-- prefab index = `PhotonNetwork.LocalPlayer.ActorNumber - 1`
-- `TutorialSpawnManager` (class in `SpawnManager.cs`) handles instantiation
-- `PlayerRegistry` tracks all active `PlayerStats`:
-  - `PlayerRegistry.All` — iterate all players (use this, never `FindWithTag("Player")`)
-  - `PlayerRegistry.GetLocalPlayerTransform()` — local player
-
-# Quest System
-- `QuestManager` (singleton, `MonoBehaviourPun`, `IPunObservable`, `IInRoomCallbacks`)
-- quest data defined in `QuestData.cs` — `Quest` has `QuestObjective[]` array
-- objective types: `Kill`, `Collect`, `TalkTo`, `ReachArea`, `FindArea`, `ShrineOffering`, `PowerSteal`, `Custom`
-- master-authoritative for Kill/ReachArea/etc.
-- `Collect` and `TalkTo` are per-player: each player must complete individually before quest advances
-- quest UI shows "Complete - waiting for other players (X/4)" when locally done
-- pickup quest progress: `ItemPickup.UpdateQuestProgress()` → `AddProgress_Collect`
-- inventory backup: `QuestManager.OnInventoryItemAdded` → `ScheduleInventoryReconcile()` (1-frame delay)
-- `QuestJsonLoader` / `ShopTradeJsonLoader` — load quest/trade definitions from JSON in `Resources/`
-
-# Inventory And Equipment
-- `Inventory` (`MonoBehaviourPun`, `IPunObservable`) — per-player component
-- events: `OnItemAdded`, `OnInventoryChanged`, `OnItemRemoved`, `OnSlotChanged`
-- `Inventory.FindLocalInventory()` uses `PlayerRegistry.GetLocalPlayerTransform()` first
-- `QuestManager.EnsurePlayerInventory()` handles subscribe/unsubscribe via `lastInventoryRef` tracking
-- `QuestManager.RefreshPlayerInventory()` forces re-resolution after spawn/scene transition
-- **never manually subscribe to inventory events outside `EnsurePlayerInventory()`** — prevents double subscription
-- `EquipmentManager` — per-player, resolves hand bone via `HumanBodyBones.RightHand`
-- scene transition: `Inventory.CacheLocalInventory()` / `EquipmentManager.CacheLocalEquipment()` before load, auto-restore in `Awake()`
-
-# Enemy AI
-- Base: `BaseEnemyAI` in `Assets/Scripts/Enemies/`. BT nodes in `Assets/Scripts/Enemies/BehaviorTree/`.
-- Use `isBusy`, `BeginAction()`/`EndAction()`, `globalBusyTimer`; run attack logic in coroutines; guard with `!PhotonNetwork.IsMasterClient` return in Update.
-- per-creature scripts: `Assets/Enemies/<CreatureName>/<CreatureName>AI.cs`
-- creatures: Amomongo, Aswang Queen, Aswang Unit, Bad Diwata-Punso, Bakunawa, Berberoka,
-  Bungisngis, Busaw, DiwataPunso, Kapre, Manananggal, Minokawa, Pugot, Sarimanok,
-  Shadow Touched Diwata, Sigbin, Sirena, Tikbalang, Tiyanak, Wakwak
-- `EnemyData` (ScriptableObject) for stats/loot
-- `MapEnemyDirector` / `PerlinEnemySpawner` for procedural placement
-- `EnemyCampEncounter` — self-contained camp system: spawns enemies, tracks defeats, grants team buffs (master-authoritative)
-- `NightHuntModifier` — runtime `EnemyData` override for night enemies (creates runtime SO copy)
-- shared utilities in `Assets/Enemies/1COMMON/`: `BeamMover`, `DestroyAfterSeconds`, `EnemyDamageZone`, `EnemyProjectile`
-
-# Damage And Status Effect Routing
-- player damage: `DamageRelay.ApplyToPlayer()`
-- enemy damage: `EnemyDamageRelay.Apply()` (static, network-safe)
-- status effects: `StatusEffectRelay.Apply()` (static, types: Slow, Root, Silence, Stun, DefenseDown, Bleed, StaminaBurn)
-- `PlayerDamageOnTrigger` — generic hazard/trap trigger component
-
-# Ability And Moveset System
-- `AbilityBase` (abstract ScriptableObject, namespace `AlbuRIOT.Abilities`) — cooldown, icon, `Execute()`
-- `MovesetManager` (`MonoBehaviourPun`, per-player) — combat style switching, syncs via buffered RPC
-- `MovesetData` / `SpecialMoveData` (ScriptableObjects) — attack stats, special moves, VFX, audio
-
-# Input And UI Locking
-- `LocalInputLocker.Ensure()` — named lock stack with per-owner tracking
-- `LocalUIManager.Ensure()` — exclusive UI panel ownership
-- after cutscene/transition, release stale locks and call `ForceGameplayCursor()`
-
-# MapResourcesGenerator Notes
-- avoid `PhotonNetwork.Destroy` for scene/local PhotonViews (ViewID <= 0); use local `Destroy`
-- non-owner clients should not network-destroy generated objects; require `pv.IsMine` or MasterClient
-- clear existing `SpawnMarker_*` before recreating from buffered RPCs
-- deterministic names + pre-spawn cleanup for map guide objects
-
-# Gameplay/Design Preferences
-- camera: 3rd person (`ThirdPersonCameraOrbit`)
-- movement: wasd (`ThirdPersonController`)
-- inventory: per-player
-- UI/UX and art/audio must align with `storyline.txt` and `alburiot.txt`
-- chapter progression and level content must align with `Assets/docs/CHAPTER 1 - 3.md`
-
-# Key Paths (quick reference)
-- Player: `PlayerStats`, `ThirdPersonController`, `PlayerCombat`, `PlayerAnimatorSync`
-- Combat: `AbilityBase`, `PlayerCombat`, `DebuffManager`, `DamageRelay`, `EnemyDamageRelay`
-- Inventory: `Inventory`, `InventoryUI`, `ItemManager`; use `Inventory.FindLocalInventory()` for multiplayer
-- Managers: `GameManager`, `NetworkManager`, `QuestManager`, `CutsceneManager`, `NunoShopManager`, `ShopTradeJsonLoader`
-- UI: TextMesh Pro only; per-player canvases
-- Data: ScriptableObjects in `Assets/Resources/`; JSON via `QuestJsonLoader`, `ShopTradeJsonLoader`
-- Input: `InputSystem_Actions.inputactions` (no hardcoded keycodes)
-
-# MCP (Unity / ai-game-developer)
-- When MCP tools are available (e.g. ai-game-developer server connected to Unity), **use them** for Unity-related tasks: inspecting scenes, GameObjects (e.g. CENTER, Model_Bakunawa), components, hierarchy, and running Unity commands. Prefer MCP tools over guessing scene or inspector state.
-- If the user asks to check or fix something in a Unity scene, try MCP tools first when the server is enabled.
-
-# Unity workflow
-- Do **not** create Unity Editor tools (menu items, editor windows, custom inspectors) unless the user explicitly asks for them. If they need something set up in Unity, they will say so; prefer adding setup steps to existing docs (e.g. BAKUNAWA_SETUP.md) instead.
-- Do **not** create new `.md` (or other documentation) files unless the user explicitly asks for one.
-
-# Output
-- Minimal edits; preserve formatting. No reformat or rename unless asked.
-- Avoid new packages or `.meta` changes unless requested.
-
-# Validation Checklist
-For gameplay/transition changes, verify:
-- no compile errors
-- host/client both complete transition
-- local player spawns once and lands on correct spawn marker
-- loading screen lifecycle is correct
-- input and camera control return correctly after cutscene/transition
-- inventory events fire correctly (no double subscription, UI updates on add/remove/equip)
-- quest progress applies for all players individually (Collect/TalkTo)
+# Validation Focus
+For network/gameplay/transition edits, verify:
+- Unity compile health (no introduced script errors)
+- host/client transition consistency
+- single local spawn at expected marker
+- input/camera restoration after transitions/cutscenes

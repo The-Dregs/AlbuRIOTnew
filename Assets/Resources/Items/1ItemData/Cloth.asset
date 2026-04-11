@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Cloth
   description: Woven fabric made from natural fibers. Used in crafting and equipment.
   icon: {fileID: 21300000, guid: 454df8742fb1daf4185a770b6fac67bd, type: 3}
-  itemType: 6
+  itemType: 8
   maxStack: 67
   healthModifier: 0
   staminaModifier: 0

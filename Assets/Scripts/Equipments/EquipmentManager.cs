@@ -18,12 +18,12 @@ public class EquipmentManager : MonoBehaviourPun
 #if UNITY_EDITOR
     void OnValidate()
     {
-        // Notify EquipmentGripPreview so it updates instantly when hold offsets change
+        // RefreshPreview uses DestroyImmediate — cannot run inside OnValidate; defer on the preview component.
         var previews = Object.FindObjectsByType<EquipmentGripPreview>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var p in previews)
         {
             if (p != null && p.equipmentManager == this && p.previewActive)
-                p.RefreshPreview();
+                p.ScheduleEditorValidateApply();
         }
     }
 #endif
@@ -276,7 +276,7 @@ public class EquipmentManager : MonoBehaviourPun
         
         // Apply transform: item overrides (or prefab default) + per-player hold offset
         Vector3 basePos = item.overrideTransform ? item.modelLocalPosition : Vector3.zero;
-        Quaternion baseRot = item.overrideTransform ? Quaternion.Euler(item.modelLocalEulerAngles) : Quaternion.identity;
+        Quaternion baseRot = item.GetEquipmentModelLocalRotation();
         equippedModelInstance.transform.localPosition = basePos + holdPositionOffset;
         equippedModelInstance.transform.localRotation = baseRot * Quaternion.Euler(holdRotationOffset);
         

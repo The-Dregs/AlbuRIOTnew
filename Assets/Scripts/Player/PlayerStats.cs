@@ -315,6 +315,7 @@ public class PlayerStats : MonoBehaviourPun, IPunObservable
         // god mode: unlimited stamina, always return true
         if (godMode)
         {
+            currentStamina = maxStamina;
             return true;
         }
         if (currentStamina >= amount)
@@ -495,6 +496,24 @@ public class PlayerStats : MonoBehaviourPun, IPunObservable
         staminaCostModifier -= item.staminaCostModifier;
         currentHealth = Mathf.Min(currentHealth, maxHealth);
         currentStamina = Mathf.Min(currentStamina, maxStamina);
+    }
+
+    /// <summary>Values for inventory UI: base max HP without the currently equipped item's bonus.</summary>
+    public int GetDisplayedBaseMaxHealth(ItemData equipped) =>
+        equipped != null ? maxHealth - equipped.healthModifier : maxHealth;
+
+    public int GetDisplayedBaseMaxStamina(ItemData equipped) =>
+        equipped != null ? maxStamina - equipped.staminaModifier : maxStamina;
+
+    public int GetDisplayedBaseDamage(ItemData equipped) =>
+        equipped != null ? baseDamage - equipped.damageModifier : baseDamage;
+
+    /// <summary>Walk speed before equipment: controller move speed + non-equipment speedModifier.</summary>
+    public float GetDisplayedBaseWalkSpeed(ThirdPersonController controller, ItemData equipped)
+    {
+        float equip = equipped != null ? equipped.speedModifier : 0f;
+        float move = controller != null ? controller.moveSpeed : baseSpeed;
+        return move + speedModifier - equip;
     }
 
     // external controllers can toggle stamina regen based on movement state
@@ -748,21 +767,39 @@ public class PlayerStats : MonoBehaviourPun, IPunObservable
             }
         }
         
-        // Respawn at spawn point
+        // Resolve respawn point from centralized spawn coordinator so each player
+        // returns to their assigned SpawnMarker_# (or configured fallback).
+        Vector3 resolvedSpawnPosition = spawnPosition;
+        Vector3 resolvedFaceDirection = transform.forward;
+        bool hasResolvedSpawn = PlayerSpawnCoordinator.TryGetBestSpawnPosition(
+            out resolvedSpawnPosition,
+            out resolvedFaceDirection,
+            out string _,
+            requireSpawnMarkers: true);
+
+        if (!hasResolvedSpawn)
+        {
+            hasResolvedSpawn = PlayerSpawnCoordinator.TryGetBestSpawnPosition(
+                out resolvedSpawnPosition,
+                out resolvedFaceDirection,
+                out string _,
+                requireSpawnMarkers: false);
+        }
+
+        if (hasResolvedSpawn)
+        {
+            spawnPosition = resolvedSpawnPosition;
+        }
+        else if (spawnPosition == Vector3.zero)
+        {
+            // Final fallback so we never snap to world origin unless intentionally configured.
+            spawnPosition = transform.position;
+        }
+
+        // Respawn at resolved spawn point
         if (photonView != null && photonView.IsMine)
         {
-            // Teleport player
-            CharacterController cc = GetComponent<CharacterController>();
-            if (cc != null)
-            {
-                cc.enabled = false;
-                transform.position = spawnPosition;
-                cc.enabled = true;
-            }
-            else
-            {
-                transform.position = spawnPosition;
-            }
+            PlayerSpawnCoordinator.TeleportAndSetupPlayer(gameObject, spawnPosition, resolvedFaceDirection);
             
             // Reset health and stamina
             currentHealth = maxHealth;

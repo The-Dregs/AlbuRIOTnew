@@ -161,6 +161,7 @@ MonoBehaviour:
   - RPC_SetFogPixels
   - RPC_SetMinimapCameraState
   - RPC_RequestCompletedQuestEnemySpawn
+  - RPC_RequestClockSync
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

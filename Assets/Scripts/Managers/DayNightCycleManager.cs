@@ -250,14 +250,22 @@ public class DayNightCycleManager : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     private float _noBaselineElapsed;
+    private float _nextSyncRequestAt;
 
     private void FollowNetworkClock()
     {
         if (!_hasNetworkBaseline)
         {
             _noBaselineElapsed += Time.deltaTime;
-            if (_noBaselineElapsed > 3f)
+            if (_noBaselineElapsed >= 1.5f && PhotonNetwork.IsConnected && PhotonNetwork.InRoom && Time.unscaledTime >= _nextSyncRequestAt)
             {
+                RequestClockSyncFromMaster();
+                _nextSyncRequestAt = Time.unscaledTime + 1.5f;
+            }
+
+            if (_noBaselineElapsed > 5f)
+            {
+                // Last-resort fallback so visuals still function if sync messages are unavailable.
                 _hasNetworkBaseline = true;
                 _networkBaselineTimeOfDay = timeOfDay;
                 _networkBaselineTimestamp = PhotonNetwork.Time;
@@ -270,6 +278,76 @@ public class DayNightCycleManager : MonoBehaviourPunCallbacks, IPunObservable
         float elapsed = (float)Math.Max(0.0, PhotonNetwork.Time - _networkBaselineTimestamp);
         float predicted = Mathf.Repeat(_networkBaselineTimeOfDay + (elapsed / safeDuration), 1f);
         timeOfDay = LerpWrapped01(timeOfDay, predicted, Mathf.Clamp01(Time.deltaTime * syncSmoothing));
+    }
+
+    private void RequestClockSyncFromMaster()
+    {
+        if (photonView == null || !PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
+            return;
+
+        Player master = PhotonNetwork.MasterClient;
+        if (master == null || master.ActorNumber <= 0)
+            return;
+
+        photonView.RPC(nameof(RPC_RequestClockSync), master, PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.ActorNumber : -1);
+    }
+
+    [PunRPC]
+    private void RPC_RequestClockSync(int requesterActorNumber, PhotonMessageInfo _)
+    {
+        if (!IsAuthority || photonView == null || !PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
+            return;
+
+        Player requester = PhotonNetwork.CurrentRoom != null ? PhotonNetwork.CurrentRoom.GetPlayer(requesterActorNumber) : null;
+        if (requester == null)
+            return;
+
+        photonView.RPC(nameof(RPC_ForceClockSync), requester, timeOfDay, PhotonNetwork.Time);
+    }
+
+    public override void OnJoinedRoom()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            _hasNetworkBaseline = true;
+            _networkBaselineTimeOfDay = Mathf.Repeat(timeOfDay, 1f);
+            _networkBaselineTimestamp = PhotonNetwork.Time;
+            return;
+        }
+
+        _hasNetworkBaseline = false;
+        _noBaselineElapsed = 0f;
+        _nextSyncRequestAt = 0f;
+        RequestClockSyncFromMaster();
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        if (!PhotonNetwork.IsConnected || !PhotonNetwork.InRoom)
+            return;
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // This client became authority; anchor baseline to its current time.
+            _hasNetworkBaseline = true;
+            _networkBaselineTimeOfDay = Mathf.Repeat(timeOfDay, 1f);
+            _networkBaselineTimestamp = PhotonNetwork.Time;
+        }
+        else
+        {
+            // New non-authority should immediately resync to the new master.
+            _hasNetworkBaseline = false;
+            _noBaselineElapsed = 0f;
+            _nextSyncRequestAt = 0f;
+            RequestClockSyncFromMaster();
+        }
+    }
+
+    public override void OnLeftRoom()
+    {
+        _hasNetworkBaseline = false;
+        _noBaselineElapsed = 0f;
+        _nextSyncRequestAt = 0f;
     }
 
     private void UpdatePhaseAndEvents()
@@ -578,6 +656,20 @@ public class DayNightCycleManager : MonoBehaviourPunCallbacks, IPunObservable
     public bool IsDay()
     {
         return CurrentPhase == TimePhase.Day || CurrentPhase == TimePhase.Dawn;
+    }
+
+    /// <summary>
+    /// Re-applies environment visuals immediately (fog/light/sky) using current timeOfDay.
+    /// Useful when another system temporarily overrides RenderSettings.
+    /// </summary>
+    public void ForceApplyEnvironmentNow()
+    {
+        _environmentDtForLastApply = Mathf.Max(0.02f, environmentUpdateInterval);
+        _environmentUpdateTimer = 0f;
+        _lastAppliedFogDensity = float.NaN;
+        _lastAppliedFogEnabled = !RenderSettings.fog;
+        UpdateLighting();
+        UpdateVisuals();
     }
 
     public float GetTimeUntilNight()

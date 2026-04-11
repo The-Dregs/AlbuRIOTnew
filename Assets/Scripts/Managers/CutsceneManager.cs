@@ -965,6 +965,13 @@ public class CutsceneManager : MonoBehaviourPunCallbacks
     {
         cutsceneSkipped = true;
         AcquireCutsceneCursorLock();
+
+        // Hide skip UI immediately so it never remains visible after skip.
+        if (skipButton != null)
+            skipButton.SetActive(false);
+        if (runtimeSkipCanvas != null)
+            runtimeSkipCanvas.SetActive(false);
+
         if (cutsceneDirector != null)
         {
             cutsceneDirector.Stop();

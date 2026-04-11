@@ -45,7 +45,9 @@ public class ProloguePauseMenu : MonoBehaviour
         // ensure menu has a visible cursor
         if (LocalUIManager.Instance != null) LocalUIManager.Instance.ForceClose();
         LocalInputLocker.Ensure().EnterMenuMode();
-        Photon.Pun.PhotonNetwork.LoadLevel(mainMenuSceneName);
+        // Local leave only: avoid host forcing all clients back via scene sync.
+        NetworkManager.ForceDisconnectAndCleanup("[ProloguePauseMenu] LoadMainMenu");
+        SceneManager.LoadScene(mainMenuSceneName);
     }
 
     public void TeleportToMainScene()

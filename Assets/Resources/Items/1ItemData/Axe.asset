@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49583e7f51600d243807eff9b726b809, type: 3}
+  m_Name: Axe
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: Axe
+  description: A survivor's tool turned weapon, its broad edge honed on hardwood
+    and on harder nights when the jungle stops forgiving.
+  icon: {fileID: 21300000, guid: 3afd7ed35b465b447964da2185490058, type: 3}
+  itemType: 1
+  maxStack: 1
+  healthModifier: 0
+  staminaModifier: 0
+  damageModifier: 25
+  speedModifier: 0
+  staminaCostModifier: 0
+  healAmount: 0
+  staminaRestore: 0
+  effectDuration: 0
+  isQuestItem: 0
+  questId: 
+  canBeOffered: 0
+  offeringValue: 1
+  grantsPower: 0
+  associatedEnemy: 
+  uniqueInstance: 0
+  pickupSound: {fileID: 0}
+  useSound: {fileID: 0}
+  pickupEffect: {fileID: 0}
+  useEffect: {fileID: 0}
+  modelPrefab: {fileID: 919132149155446097, guid: 2364c632575aa3c4c9152ac0fe7a89d4, type: 3}
+  overrideTransform: 1
+  modelLocalPosition: {x: -0.10499691, y: 0.01699219, z: -0.023999013}
+  modelLocalEulerAngles: {x: 338.1846, y: 259.63632, z: 168.80017}
+  modelScale: {x: 32.98, y: 32.98, z: 32.98}
+  modelGripQuaternionAuthoritative: 1
+  modelLocalGripQuaternion: {x: -0.7624287, y: 0.046997733, z: 0.6116007, w: 0.20600578}

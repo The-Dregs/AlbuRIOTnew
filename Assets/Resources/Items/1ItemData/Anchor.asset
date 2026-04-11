@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49583e7f51600d243807eff9b726b809, type: 3}
+  m_Name: Anchor
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: Anchor
+  description: Iron torn from a wreck that never found safe harbor. It strikes with
+    the sea's full weight, but drags on your wind and your step.
+  icon: {fileID: 21300000, guid: 7dd50ec18c934ba4e9085827fa7880c0, type: 3}
+  itemType: 1
+  maxStack: 1
+  healthModifier: 0
+  staminaModifier: -10
+  damageModifier: 30
+  speedModifier: -0.5
+  staminaCostModifier: 0
+  healAmount: 0
+  staminaRestore: 0
+  effectDuration: 0
+  isQuestItem: 0
+  questId: 
+  canBeOffered: 0
+  offeringValue: 1
+  grantsPower: 0
+  associatedEnemy: 
+  uniqueInstance: 0
+  pickupSound: {fileID: 0}
+  useSound: {fileID: 0}
+  pickupEffect: {fileID: 0}
+  useEffect: {fileID: 0}
+  modelPrefab: {fileID: 919132149155446097, guid: c193f763f02fa2d49aee32844f1c7b76, type: 3}
+  overrideTransform: 1
+  modelLocalPosition: {x: -0.050743848, y: 0.07521082, z: 0.02165731}
+  modelLocalEulerAngles: {x: 288.5589, y: 41.943913, z: 42.32899}
+  modelScale: {x: 53.16, y: 53.16, z: 53.16}
+  modelGripQuaternionAuthoritative: 1
+  modelLocalGripQuaternion: {x: -0.40347233, y: 0.46780562, z: 0.46857193, w: 0.63151276}

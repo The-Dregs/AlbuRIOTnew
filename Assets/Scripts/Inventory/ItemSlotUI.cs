@@ -26,19 +26,31 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         this.slot = slot;
         if (iconImage != null)
-            iconImage.sprite = slot.item.icon;
+        {
+            iconImage.sprite = slot.item != null ? slot.item.icon : null;
+            bool hasIcon = slot.item != null && slot.item.icon != null;
+            var c = iconImage.color;
+            c.a = hasIcon ? 1f : 0f;
+            iconImage.color = c;
+            iconImage.enabled = true;
+            // Avoid blocking clicks/hover on the slot when there is no icon to show.
+            iconImage.raycastTarget = hasIcon;
+        }
         
         // Handle quantity display based on item type
         if (quantityText != null)
         {
-            if (slot.item.itemType == ItemType.Consumable)
+            if (slot.item.IsEquipment)
             {
-                // Consumable always shows quantity
+                // Equipment is always one per slot; never show a stack count.
+                quantityText.text = "";
+            }
+            else if (slot.item.itemType == ItemType.Consumable)
+            {
                 quantityText.text = $"{slot.quantity}x";
             }
             else
             {
-                // Other types only show if quantity > 1
                 quantityText.text = slot.quantity > 1 ? ($"{slot.quantity}x") : "";
             }
         }
@@ -69,7 +81,15 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public void Clear()
     {
         slot = null;
-        if (iconImage != null) iconImage.sprite = null;
+        if (iconImage != null)
+        {
+            iconImage.sprite = null;
+            var c = iconImage.color;
+            c.a = 0f;
+            iconImage.color = c;
+            iconImage.enabled = true;
+            iconImage.raycastTarget = false;
+        }
         if (quantityText != null) quantityText.text = "";
         if (equipButton != null)
         {
@@ -102,7 +122,9 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         if (inventoryUI == null) return;
         if (slot != null && slot.item != null)
         {
-            inventoryUI.ShowHoveredItem(slot.item);
+            var rt = transform as RectTransform;
+            if (rt != null)
+                inventoryUI.ShowItemTooltip(slot.item, rt);
         }
     }
     
@@ -110,6 +132,6 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         if (inventoryUI == null) inventoryUI = GetComponentInParent<InventoryUI>(true);
         if (inventoryUI == null) return;
-        inventoryUI.ClearHoveredItem();
+        inventoryUI.HideItemTooltip();
     }
 }

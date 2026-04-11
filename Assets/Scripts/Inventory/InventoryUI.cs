@@ -1,12 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class InventoryUI : MonoBehaviour
 {
     public GameObject inventoryPanel;
-    [Header("fixed slots (3x2)")]
-    [Tooltip("exactly 6 slot UI boxes in reading order (row-major): top-left to bottom-right of the right grid")] public ItemSlotUI[] slotUIs = new ItemSlotUI[Inventory.SLOT_COUNT];
+    [Header("fixed slots (grid)")]
+    [Tooltip("Inventory slot UI boxes in reading order (row-major); must match Inventory.SLOT_COUNT.")] public ItemSlotUI[] slotUIs = new ItemSlotUI[Inventory.SLOT_COUNT];
+    [Tooltip("If set, ItemSlotUI discovery is limited to this transform (recommended: your grid container).")]
+    public Transform slotsGridRoot;
     [Header("legacy dynamic list (unused)")]
     [HideInInspector] public Transform itemListParent; // kept for backward compatibility, unused in fixed-six layout
     [HideInInspector] public GameObject itemSlotPrefab; // kept for backward compatibility, unused in fixed-six layout
@@ -17,17 +19,28 @@ public class InventoryUI : MonoBehaviour
     [SerializeField, HideInInspector] private PlayerCombat playerCombat;
     [SerializeField, HideInInspector] private ThirdPersonCameraOrbit cameraOrbit;
     [SerializeField, HideInInspector] private EquipmentManager equipmentManager;
+    [SerializeField, HideInInspector] private PlayerStats playerStats;
     public TMPro.TextMeshProUGUI equippedItemText;
     public Image equippedItemIcon; // optional: shows the equipped item's icon in the large left square
     public UnityEngine.UI.Button unequipButton; // optional: button to unequip current item back to inventory
     [Header("Equipped Item Details")]
     public TMPro.TextMeshProUGUI equippedItemName; // optional: displays the equipped item's name
     public TMPro.TextMeshProUGUI equippedItemDescription; // optional: displays the equipped item's description
+    [Header("Player stats (inventory open)")]
+    [Tooltip("TMP lines: base value + green equipment bonus, e.g. HP: 100 +10")] public TMPro.TextMeshProUGUI statHpText;
+    public TMPro.TextMeshProUGUI statStaminaText;
+    public TMPro.TextMeshProUGUI statDamageText;
+    public TMPro.TextMeshProUGUI statSpeedText;
+    [Header("Item hover")]
+    [Tooltip("Optional. Child panel under inventory root; reparented to hovered slot while visible.")]
+    public InventoryItemTooltip itemTooltip;
+    [Header("Equipped item tooltip")]
+    [Tooltip("Optional. RectTransform for the large equipped preview; defaults to equippedItemIcon. Needs a Graphic with Raycast Target for hover (icon Image is enabled when an item is equipped).")]
+    public RectTransform equippedItemHoverArea;
     private int _inputLockToken = 0;
     private CanvasGroup _panelCanvasGroup; // used when panel is the same object as this controller
     private string _lastStateSignature = ""; // snapshot of inventory + equipped to detect changes
     private bool _isOpen = false; // runtime state
-    private ItemData _hoveredItem = null; // currently hovered item for description display
 
     // read-only accessors for other UI pieces
     public Inventory PlayerInventory => playerInventory;
@@ -52,12 +65,33 @@ public class InventoryUI : MonoBehaviour
         }
         // draw once and set state signature
         _lastStateSignature = BuildStateSignature();
+        WireUnequipButton();
+        WireEquippedTooltipHover();
         RefreshUI();
+    }
+
+    private void WireEquippedTooltipHover()
+    {
+        RectTransform rt = equippedItemHoverArea;
+        if (rt == null && equippedItemIcon != null)
+            rt = equippedItemIcon.rectTransform;
+        if (rt == null) return;
+        var h = rt.GetComponent<InventoryEquippedSlotHover>();
+        if (h == null)
+            h = rt.gameObject.AddComponent<InventoryEquippedSlotHover>();
+        h.Bind(this);
+    }
+
+    private void WireUnequipButton()
+    {
+        if (unequipButton == null) return;
+        unequipButton.onClick.RemoveListener(OnClickUnequip);
+        unequipButton.onClick.AddListener(OnClickUnequip);
     }
 
     private void Update()
     {
-        if (playerInventory == null || equipmentManager == null)
+        if (playerInventory == null || equipmentManager == null || playerStats == null)
             AutoWireIfNeeded();
         var photonView = playerInventory != null ? playerInventory.GetComponent<Photon.Pun.PhotonView>() : null;
         if (photonView != null && !photonView.IsMine) return;
@@ -79,6 +113,7 @@ public class InventoryUI : MonoBehaviour
                 Debug.LogWarning("[inventory] panel was disabled externally while open; re-enabling.");
                 inventoryPanel.SetActive(true);
             }
+            UpdateStatsTexts();
         }
     }
 
@@ -97,6 +132,8 @@ public class InventoryUI : MonoBehaviour
             ui.TryOpen("Inventory");
         }
         EnsurePanelReference();
+        WireUnequipButton();
+        WireEquippedTooltipHover();
         SetPanelVisible(true);
         Debug.Log("[inventory] open inventory ui");
         _isOpen = true;
@@ -118,6 +155,7 @@ public class InventoryUI : MonoBehaviour
             _inputLockToken = 0;
         }
         LocalInputLocker.Ensure().ForceGameplayCursor();
+        HideItemTooltip();
     }
 
     private void AutoWireIfNeeded()
@@ -126,6 +164,8 @@ public class InventoryUI : MonoBehaviour
             playerInventory = GetComponentInParent<Inventory>(true);
         if (equipmentManager == null)
             equipmentManager = GetComponentInParent<EquipmentManager>(true);
+        if (playerStats == null)
+            playerStats = GetComponentInParent<PlayerStats>(true);
         if (playerController == null)
             playerController = GetComponentInParent<ThirdPersonController>(true);
         if (playerCombat == null)
@@ -135,24 +175,68 @@ public class InventoryUI : MonoBehaviour
 
         EnsurePanelReference();
 
-        // auto-populate slotUIs from children if not fully assigned
-        int assigned = 0;
-        if (slotUIs != null)
+        EnsureSlotUIsBound();
+    }
+
+    /// <summary>
+    /// Resizes slotUIs to SLOT_COUNT, preserves existing inspector wiring, fills nulls from hierarchy in stable order.
+    /// Does not replace non-null entries (avoids scrambled order / missing items after expanding the grid).
+    /// </summary>
+    private void EnsureSlotUIsBound()
+    {
+        int count = Inventory.SLOT_COUNT;
+        if (slotUIs == null || slotUIs.Length != count)
         {
-            for (int i = 0; i < slotUIs.Length; i++) if (slotUIs[i] != null) assigned++;
-        }
-        if (slotUIs == null || slotUIs.Length < Inventory.SLOT_COUNT || assigned < Inventory.SLOT_COUNT)
-        {
-            Transform root = (inventoryPanel != null) ? inventoryPanel.transform : this.transform;
-            var found = root.GetComponentsInChildren<ItemSlotUI>(true);
-            if (found != null && found.Length > 0)
+            var old = slotUIs;
+            slotUIs = new ItemSlotUI[count];
+            if (old != null)
             {
-                var newArr = new ItemSlotUI[Inventory.SLOT_COUNT];
-                int take = Mathf.Min(Inventory.SLOT_COUNT, found.Length);
-                for (int i = 0; i < take; i++) newArr[i] = found[i];
-                slotUIs = newArr;
+                int copy = Mathf.Min(old.Length, count);
+                for (int i = 0; i < copy; i++)
+                    slotUIs[i] = old[i];
             }
         }
+
+        int assigned = 0;
+        for (int i = 0; i < slotUIs.Length; i++)
+            if (slotUIs[i] != null) assigned++;
+        if (assigned >= count) return;
+
+        Transform root = slotsGridRoot != null
+            ? slotsGridRoot
+            : ((inventoryPanel != null) ? inventoryPanel.transform : this.transform);
+        var found = root.GetComponentsInChildren<ItemSlotUI>(true);
+        if (found == null || found.Length == 0) return;
+
+        System.Array.Sort(found, (a, b) =>
+            string.CompareOrdinal(GetHierarchySortKey(a.transform, root), GetHierarchySortKey(b.transform, root)));
+
+        var used = new HashSet<ItemSlotUI>();
+        for (int i = 0; i < slotUIs.Length; i++)
+            if (slotUIs[i] != null) used.Add(slotUIs[i]);
+
+        int fi = 0;
+        for (int i = 0; i < slotUIs.Length; i++)
+        {
+            if (slotUIs[i] != null) continue;
+            while (fi < found.Length && used.Contains(found[fi]))
+                fi++;
+            if (fi >= found.Length) break;
+            slotUIs[i] = found[fi];
+            used.Add(found[fi]);
+            fi++;
+        }
+    }
+
+    private static string GetHierarchySortKey(Transform t, Transform stopAt)
+    {
+        var s = new System.Text.StringBuilder();
+        while (t != null && t != stopAt)
+        {
+            s.Insert(0, $"{t.GetSiblingIndex():D4}/");
+            t = t.parent;
+        }
+        return s.ToString();
     }
 
     // ensure we know which panel to show/hide. if designers assigned the controller
@@ -240,7 +324,10 @@ public class InventoryUI : MonoBehaviour
             return;
         }
 
-        // fixed six-slot UI binding (defensive against partial assignment)
+        EnsurePanelReference();
+        EnsureSlotUIsBound();
+
+        // fixed grid UI binding (defensive against partial assignment)
         int uiCount = (slotUIs != null) ? slotUIs.Length : 0;
         int loop = Mathf.Min(Inventory.SLOT_COUNT, uiCount);
         for (int i = 0; i < loop; i++)
@@ -258,10 +345,11 @@ public class InventoryUI : MonoBehaviour
             else
             {
                 ui.Clear();
-                if (ui.gameObject.activeSelf) ui.gameObject.SetActive(false);
+                // Keep empty slot objects active so the grid stays visible and raycasts work.
+                if (!ui.gameObject.activeSelf) ui.gameObject.SetActive(true);
             }
         }
-        // if designer forgot to assign all six, no crash; optional warning once
+        // if designer forgot to assign all slots, indices with null slotUIs are skipped
 
         // equipped text and icon
         if (equipmentManager != null)
@@ -273,25 +361,32 @@ public class InventoryUI : MonoBehaviour
                 {
                     equippedItemIcon.enabled = true;
                     equippedItemIcon.sprite = equipmentManager.equippedItem.icon;
+                    var c = equippedItemIcon.color;
+                    c.a = equipmentManager.equippedItem.icon != null ? 1f : 0f;
+                    equippedItemIcon.color = c;
+                    // Raycast so InventoryEquippedSlotHover can show tooltips on the preview (Unequip stays on top via sibling order).
+                    equippedItemIcon.raycastTarget = true;
                 }
                 else
                 {
                     equippedItemIcon.sprite = null;
-                    equippedItemIcon.enabled = false; // hide white box
+                    var c = equippedItemIcon.color;
+                    c.a = 0f;
+                    equippedItemIcon.color = c;
+                    equippedItemIcon.enabled = true;
+                    equippedItemIcon.raycastTarget = false;
                 }
             }
             
-            // Text fields show hovered item if hovering, otherwise show equipped item
-            ItemData displayItem = _hoveredItem != null ? _hoveredItem : equipmentManager.equippedItem;
-            
+            ItemData eqItem = equipmentManager.equippedItem;
             if (equippedItemText != null)
-                equippedItemText.text = equipmentManager.equippedItem != null ? $"Equipped: {equipmentManager.equippedItem.itemName}" : "Equipped: None";
+                equippedItemText.text = eqItem != null ? $"Equipped: {eqItem.itemName}" : "Equipped: None";
             
             if (equippedItemName != null)
             {
-                if (displayItem != null)
+                if (eqItem != null)
                 {
-                    equippedItemName.text = displayItem.itemName;
+                    equippedItemName.text = eqItem.itemName;
                     equippedItemName.gameObject.SetActive(true);
                 }
                 else
@@ -302,9 +397,9 @@ public class InventoryUI : MonoBehaviour
             }
             if (equippedItemDescription != null)
             {
-                if (displayItem != null)
+                if (eqItem != null)
                 {
-                    equippedItemDescription.text = displayItem.description;
+                    equippedItemDescription.text = eqItem.description;
                     equippedItemDescription.gameObject.SetActive(true);
                 }
                 else
@@ -314,8 +409,17 @@ public class InventoryUI : MonoBehaviour
                 }
             }
             if (unequipButton != null)
-                unequipButton.gameObject.SetActive(equipmentManager.equippedItem != null && _hoveredItem == null);
+            {
+                unequipButton.gameObject.SetActive(eqItem != null);
+                if (eqItem != null)
+                {
+                    unequipButton.interactable = true;
+                    unequipButton.transform.SetAsLastSibling();
+                }
+            }
         }
+
+        UpdateStatsTexts();
 
         // update snapshot after drawing
         _lastStateSignature = BuildStateSignature();
@@ -348,8 +452,7 @@ public class InventoryUI : MonoBehaviour
         bool ok = equipmentManager.TryEquipFromInventorySlot(playerInventory, slot);
         if (ok)
         {
-            // Clear stale hover state so Unequip button appears immediately after equipping.
-            _hoveredItem = null;
+            HideItemTooltip();
             RefreshUI();
         }
         return ok;
@@ -395,8 +498,7 @@ public class InventoryUI : MonoBehaviour
         bool removed = playerInventory.RemoveItem(slot.item, 1);
         if (removed)
         {
-            // Consumables can destroy/move slot contents under the pointer; clear stale hover.
-            _hoveredItem = null;
+            HideItemTooltip();
             RefreshUI();
         }
         return removed;
@@ -405,22 +507,73 @@ public class InventoryUI : MonoBehaviour
     public void OnClickUnequip()
     {
         if (equipmentManager == null) return;
-        var pv = equipmentManager.GetComponent<Photon.Pun.PhotonView>();
+        // PhotonView is usually on the player root, not on EquipmentManager.
+        var pv = equipmentManager.GetComponent<Photon.Pun.PhotonView>()
+            ?? equipmentManager.GetComponentInParent<Photon.Pun.PhotonView>();
         if (pv != null && !pv.IsMine) return;
         equipmentManager.Unequip();
         RefreshUI();
     }
     
-    public void ShowHoveredItem(ItemData item)
+    public void ShowItemTooltip(ItemData item, RectTransform slotRect, InventoryTooltipPlacement placement = InventoryTooltipPlacement.AboveAnchor)
     {
-        _hoveredItem = item;
-        RefreshUI();
+        if (itemTooltip == null || item == null || slotRect == null) return;
+        itemTooltip.Show(item, slotRect, placement);
     }
-    
-    public void ClearHoveredItem()
+
+    public void HideItemTooltip()
     {
-        _hoveredItem = null;
-        RefreshUI();
+        if (itemTooltip == null) return;
+        itemTooltip.Hide();
+    }
+
+    private void UpdateStatsTexts()
+    {
+        if (statHpText == null && statStaminaText == null && statDamageText == null && statSpeedText == null)
+            return;
+        AutoWireIfNeeded();
+        if (playerStats == null) return;
+        ItemData eq = equipmentManager != null ? equipmentManager.equippedItem : null;
+
+        string GreenInt(int v)
+        {
+            if (v == 0) return "";
+            return v > 0
+                ? $" <color=#00CC00>+{v}</color>"
+                : $" <color=#CC4444>{v}</color>";
+        }
+        string GreenSpeed(float v)
+        {
+            if (Mathf.Abs(v) < 0.0001f) return "";
+            return v > 0f
+                ? $" <color=#00CC00>+{v:0.##}</color>"
+                : $" <color=#CC4444>{v:0.##}</color>";
+        }
+
+        if (statHpText != null)
+        {
+            int baseMax = playerStats.GetDisplayedBaseMaxHealth(eq);
+            int bonus = eq != null ? eq.healthModifier : 0;
+            statHpText.text = $"HP: {playerStats.currentHealth}/{baseMax}{GreenInt(bonus)}";
+        }
+        if (statStaminaText != null)
+        {
+            int baseMax = playerStats.GetDisplayedBaseMaxStamina(eq);
+            int bonus = eq != null ? eq.staminaModifier : 0;
+            statStaminaText.text = $"Stamina: {playerStats.currentStamina}/{baseMax}{GreenInt(bonus)}";
+        }
+        if (statDamageText != null)
+        {
+            int baseDmg = playerStats.GetDisplayedBaseDamage(eq);
+            int bonus = eq != null ? eq.damageModifier : 0;
+            statDamageText.text = $"Damage: {baseDmg}{GreenInt(bonus)}";
+        }
+        if (statSpeedText != null)
+        {
+            float baseWalk = playerStats.GetDisplayedBaseWalkSpeed(playerController, eq);
+            float bonus = eq != null ? eq.speedModifier : 0f;
+            statSpeedText.text = $"Speed: {baseWalk:0.#}{GreenSpeed(bonus)}";
+        }
     }
 
     // change detection helpers -------------------------------------------------

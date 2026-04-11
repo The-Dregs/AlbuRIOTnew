@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49583e7f51600d243807eff9b726b809, type: 3}
+  m_Name: Rising Sun Sword
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: Rising Sun Sword
+  description: A foreign blade washed in with tide and rumor, light in the grip and
+    swift as sunrise wind along the shallows.
+  icon: {fileID: 21300000, guid: d76841e26af7b2a44bfb155481eb848b, type: 3}
+  itemType: 1
+  maxStack: 1
+  healthModifier: 0
+  staminaModifier: 0
+  damageModifier: 20
+  speedModifier: 2
+  staminaCostModifier: 0
+  healAmount: 0
+  staminaRestore: 0
+  effectDuration: 0
+  isQuestItem: 0
+  questId: 
+  canBeOffered: 0
+  offeringValue: 1
+  grantsPower: 0
+  associatedEnemy: 
+  uniqueInstance: 0
+  pickupSound: {fileID: 0}
+  useSound: {fileID: 0}
+  pickupEffect: {fileID: 0}
+  useEffect: {fileID: 0}
+  modelPrefab: {fileID: 919132149155446097, guid: b3a378c3a9847cc488693a948342a542, type: 3}
+  overrideTransform: 1
+  modelLocalPosition: {x: -0.191, y: 0.047, z: -0.012}
+  modelLocalEulerAngles: {x: 0.0000046957553, y: 262.33627, z: 177.20607}
+  modelScale: {x: 50, y: 50, z: 50}
+  modelGripQuaternionAuthoritative: 1
+  modelLocalGripQuaternion: {x: -0.75255746, y: -0.018352196, z: 0.6580753, w: 0.016048057}

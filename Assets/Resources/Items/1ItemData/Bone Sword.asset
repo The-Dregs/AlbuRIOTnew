@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49583e7f51600d243807eff9b726b809, type: 3}
+  m_Name: Bone Sword
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: Bone Sword
+  description: A cruel blade cut from old bone; whispers say the marrow still remembers
+    whoever it belonged to.
+  icon: {fileID: 21300000, guid: 71978b242254cb642ae99c4a1daa804f, type: 3}
+  itemType: 1
+  maxStack: 1
+  healthModifier: 0
+  staminaModifier: 0
+  damageModifier: 20
+  speedModifier: 0
+  staminaCostModifier: 0
+  healAmount: 0
+  staminaRestore: 0
+  effectDuration: 0
+  isQuestItem: 0
+  questId: 
+  canBeOffered: 0
+  offeringValue: 1
+  grantsPower: 0
+  associatedEnemy: 
+  uniqueInstance: 0
+  pickupSound: {fileID: 0}
+  useSound: {fileID: 0}
+  pickupEffect: {fileID: 0}
+  useEffect: {fileID: 0}
+  modelPrefab: {fileID: 919132149155446097, guid: 00e89139544f42b4499095fcc317c132, type: 3}
+  overrideTransform: 1
+  modelLocalPosition: {x: -0.132, y: 0.056, z: -0.014}
+  modelLocalEulerAngles: {x: -0.000003562194, y: 256.34232, z: -0.0000053116287}
+  modelScale: {x: 47.16, y: 47.16, z: 47.16}
+  modelGripQuaternionAuthoritative: 1
+  modelLocalGripQuaternion: {x: 0.000000017229468, y: -0.7861681, z: -0.000000053085387, w: 0.6180127}
